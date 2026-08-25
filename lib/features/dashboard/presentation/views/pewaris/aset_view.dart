@@ -17,7 +17,7 @@ class PewarisAsetView extends ConsumerStatefulWidget {
 class _PewarisAsetViewState extends ConsumerState<PewarisAsetView> {
   String _selectedCategory = 'Semua';
 
-  static const _categories = ['Semua', 'E-Wallet', 'Crypto', 'Bank', 'Sosial'];
+  static const _categories = ['Semua', 'Crypto', 'E-Wallet', 'Bank', 'Emas', 'Saham'];
 
   @override
   Widget build(BuildContext context) {
@@ -147,11 +147,18 @@ class _AssetCard extends StatelessWidget {
 
   static (IconData, Color) _iconForType(AssetType type) {
     switch (type) {
-      case AssetType.crypto:   return (Icons.currency_bitcoin, AppColors.amber);
-      case AssetType.bank:     return (Icons.account_balance, Colors.green);
-      case AssetType.ewallet:  return (Icons.account_balance_wallet, const Color(0xFF00AED6));
-      case AssetType.socialMedia: return (Icons.photo_camera, Colors.pink);
-      case AssetType.other:    return (Icons.cloud, Colors.blue);
+      case AssetType.crypto:        return (Icons.currency_bitcoin, AppColors.amber);
+      case AssetType.saham:         return (Icons.show_chart, Colors.green);
+      case AssetType.reksaDana:     return (Icons.pie_chart, Colors.teal);
+      case AssetType.obligasi:      return (Icons.receipt_long, Colors.indigo);
+      case AssetType.eWallet:       return (Icons.account_balance_wallet, const Color(0xFF00AED6));
+      case AssetType.rekeningBank:  return (Icons.account_balance, Colors.green);
+      case AssetType.asuransiJiwa:  return (Icons.health_and_safety, Colors.red);
+      case AssetType.p2pLending:    return (Icons.handshake, Colors.orange);
+      case AssetType.emasDigital:   return (Icons.star, const Color(0xFFFFD700));
+      case AssetType.nft:           return (Icons.image, Colors.purple);
+      case AssetType.domainWebsite: return (Icons.language, Colors.blue);
+      case AssetType.lainnya:       return (Icons.cloud, Colors.grey);
     }
   }
 
