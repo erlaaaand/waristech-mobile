@@ -1,9 +1,10 @@
 /// Enum peran pengguna sesuai backend WarisTech.
+/// Nilai string harus cocok persis dengan backend (case-insensitive).
 enum UserRole {
   basic,
   pewaris,
   ahliWaris,
-  verifikator;
+  notaris; // backend menyebutnya NOTARIS, bukan VERIFIKATOR
 
   /// Konversi string dari backend ke enum [UserRole].
   static UserRole fromBackendString(String? value) {
@@ -12,9 +13,8 @@ enum UserRole {
         return UserRole.pewaris;
       case 'AHLI_WARIS':
         return UserRole.ahliWaris;
-      case 'VERIFIKATOR':
       case 'NOTARIS':
-        return UserRole.verifikator;
+        return UserRole.notaris;
       default:
         return UserRole.basic;
     }
@@ -27,7 +27,7 @@ enum UserRole {
         return 'pewaris-dashboard';
       case UserRole.ahliWaris:
         return 'ahli-waris-dashboard';
-      case UserRole.verifikator:
+      case UserRole.notaris:
         return 'verifikator-dashboard';
       default:
         return 'login';
@@ -41,8 +41,8 @@ enum UserRole {
         return 'Pewaris';
       case UserRole.ahliWaris:
         return 'Ahli Waris';
-      case UserRole.verifikator:
-        return 'Verifikator / Notaris';
+      case UserRole.notaris:
+        return 'Notaris';
       default:
         return 'Pengguna';
     }
@@ -56,44 +56,50 @@ class UserEntity {
   final String name;
   final String email;
   final UserRole role;
+  final String? avatarUrl;
 
   const UserEntity({
     required this.id,
     required this.name,
     required this.email,
     required this.role,
+    this.avatarUrl,
   });
 
-  /// Buat [UserEntity] dari respons JSON backend.
-  /// Menangani wrapper `TransformInterceptor` dan variasi field name.
+  /// Buat [UserEntity] dari respons login backend.
+  /// Backend login response: { message, user: { id, email, fullName, role } }
   factory UserEntity.fromBackendJson(Map<String, dynamic> raw) {
-    // Tangani wrapper { data: { user: ... } } atau { user: ... } atau { data: ... }
-    final data = raw['data'] ?? raw;
-    final userData = (data is Map<String, dynamic> ? data['user'] : null) ??
-        (data is Map<String, dynamic> ? data : raw);
+    // Tangani wrapper data dari TransformInterceptor
+    final envelope = raw['data'] ?? raw;
+    final userData = (envelope is Map<String, dynamic>
+        ? (envelope['user'] as Map<String, dynamic>? ?? envelope)
+        : raw);
 
     return UserEntity(
-      id: userData['id']?.toString() ?? userData['userId']?.toString() ?? '',
+      id: userData['id']?.toString() ?? '',
       name: userData['fullName']?.toString() ??
           userData['name']?.toString() ??
+          userData['email']?.toString() ??
           'User',
       email: userData['email']?.toString() ?? '',
       role: UserRole.fromBackendString(userData['role']?.toString()),
+      avatarUrl: userData['avatarUrl']?.toString(),
     );
   }
 
-  /// Buat salinan entity dengan field yang diubah.
   UserEntity copyWith({
     String? id,
     String? name,
     String? email,
     UserRole? role,
+    String? avatarUrl,
   }) {
     return UserEntity(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       role: role ?? this.role,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
 

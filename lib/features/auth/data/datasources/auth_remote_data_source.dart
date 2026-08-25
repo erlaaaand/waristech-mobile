@@ -6,7 +6,7 @@ import 'package:wt_mobile/core/network/base_remote_data_source.dart';
 class AuthRemoteDataSource extends BaseRemoteDataSource {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  /// Ambil dan simpan CSRF token sebelum setiap login.
+  /// Ambil dan simpan CSRF token sebelum setiap operasi.
   Future<void> fetchAndStoreCsrfToken() async {
     try {
       final response = await dio.get('/csrf-token');
@@ -15,12 +15,13 @@ class AuthRemoteDataSource extends BaseRemoteDataSource {
         await _storage.write(key: 'csrfToken', value: token);
       }
     } catch (_) {
-      // CSRF fetch bersifat best-effort; jangan blokir login
+      // CSRF fetch bersifat best-effort; jangan blokir proses
     }
   }
 
   /// Login dengan email dan password.
-  /// Mengembalikan raw JSON respons dari backend.
+  /// Backend mengembalikan: { message, user: { id, email, fullName, role } }
+  /// dan menyimpan accessToken di HttpOnly Cookie.
   Future<Map<String, dynamic>> login(String email, String password) {
     return safeCall(() async {
       await fetchAndStoreCsrfToken();
@@ -32,9 +33,19 @@ class AuthRemoteDataSource extends BaseRemoteDataSource {
     });
   }
 
-  /// Logout dan bersihkan sesi.
+  /// GET /auth/me — verifikasi token yang tersimpan masih valid.
+  /// Backend mengembalikan: { userId, email, role, ... }
+  Future<Map<String, dynamic>> getMe() {
+    return safeCall(() async {
+      final response = await dio.get('/auth/me');
+      return response.data as Map<String, dynamic>;
+    });
+  }
+
+  /// Logout — hapus cookie di backend.
   Future<void> logout() async {
     try {
+      await fetchAndStoreCsrfToken();
       await dio.post('/auth/logout');
     } catch (_) {
       // Logout best-effort; jangan blokir proses
