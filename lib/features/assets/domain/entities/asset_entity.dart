@@ -1,48 +1,108 @@
-// lib/features/assets/domain/entities/asset_entity.dart
-// Plain Dart class (no code generation needed)
-
+/// Jenis aset — cocok persis dengan AssetType enum backend.
 enum AssetType {
   crypto,
-  bank,
-  ewallet,
-  socialMedia,
-  other;
+  saham,
+  reksaDana,
+  obligasi,
+  eWallet,
+  rekeningBank,
+  asuransiJiwa,
+  p2pLending,
+  emasDigital,
+  nft,
+  domainWebsite,
+  lainnya;
 
   static AssetType fromString(String value) {
     switch (value.toUpperCase()) {
-      case 'CRYPTO': return AssetType.crypto;
-      case 'BANK': return AssetType.bank;
-      case 'EWALLET': return AssetType.ewallet;
-      case 'SOCIAL_MEDIA': return AssetType.socialMedia;
-      default: return AssetType.other;
+      case 'CRYPTO':         return AssetType.crypto;
+      case 'SAHAM':          return AssetType.saham;
+      case 'REKSA_DANA':     return AssetType.reksaDana;
+      case 'OBLIGASI':       return AssetType.obligasi;
+      case 'E_WALLET':       return AssetType.eWallet;
+      case 'REKENING_BANK':  return AssetType.rekeningBank;
+      case 'ASURANSI_JIWA':  return AssetType.asuransiJiwa;
+      case 'P2P_LENDING':    return AssetType.p2pLending;
+      case 'EMAS_DIGITAL':   return AssetType.emasDigital;
+      case 'NFT':            return AssetType.nft;
+      case 'DOMAIN_WEBSITE': return AssetType.domainWebsite;
+      default:               return AssetType.lainnya;
     }
   }
 
   String get displayName {
     switch (this) {
-      case AssetType.crypto: return 'Crypto';
-      case AssetType.bank: return 'Bank';
-      case AssetType.ewallet: return 'E-Wallet';
-      case AssetType.socialMedia: return 'Media Sosial';
-      case AssetType.other: return 'Lainnya';
+      case AssetType.crypto:        return 'Crypto';
+      case AssetType.saham:         return 'Saham';
+      case AssetType.reksaDana:     return 'Reksa Dana';
+      case AssetType.obligasi:      return 'Obligasi / SBN';
+      case AssetType.eWallet:       return 'E-Wallet';
+      case AssetType.rekeningBank:  return 'Rekening Bank';
+      case AssetType.asuransiJiwa:  return 'Asuransi Jiwa';
+      case AssetType.p2pLending:    return 'P2P Lending';
+      case AssetType.emasDigital:   return 'Emas Digital';
+      case AssetType.nft:           return 'NFT';
+      case AssetType.domainWebsite: return 'Domain/Website';
+      case AssetType.lainnya:       return 'Lainnya';
+    }
+  }
+
+  /// Nilai string untuk dikirim ke backend (POST /assets).
+  String get backendValue {
+    switch (this) {
+      case AssetType.crypto:        return 'CRYPTO';
+      case AssetType.saham:         return 'SAHAM';
+      case AssetType.reksaDana:     return 'REKSA_DANA';
+      case AssetType.obligasi:      return 'OBLIGASI';
+      case AssetType.eWallet:       return 'E_WALLET';
+      case AssetType.rekeningBank:  return 'REKENING_BANK';
+      case AssetType.asuransiJiwa:  return 'ASURANSI_JIWA';
+      case AssetType.p2pLending:    return 'P2P_LENDING';
+      case AssetType.emasDigital:   return 'EMAS_DIGITAL';
+      case AssetType.nft:           return 'NFT';
+      case AssetType.domainWebsite: return 'DOMAIN_WEBSITE';
+      case AssetType.lainnya:       return 'LAINNYA';
     }
   }
 }
 
+/// Status aset — cocok persis dengan AssetStatus enum backend.
 enum AssetStatus {
-  pending,
+  pendingVerification,
   verified,
   rejected,
+  frozen,
+  unlocked,
+  liquidating,
   distributed,
+  disputedLiquidation,
   closed;
 
   static AssetStatus fromString(String value) {
     switch (value.toUpperCase()) {
-      case 'VERIFIED': return AssetStatus.verified;
-      case 'REJECTED': return AssetStatus.rejected;
-      case 'DISTRIBUTED': return AssetStatus.distributed;
-      case 'CLOSED': return AssetStatus.closed;
-      default: return AssetStatus.pending;
+      case 'VERIFIED':              return AssetStatus.verified;
+      case 'REJECTED':              return AssetStatus.rejected;
+      case 'FROZEN':                return AssetStatus.frozen;
+      case 'UNLOCKED':              return AssetStatus.unlocked;
+      case 'LIQUIDATING':           return AssetStatus.liquidating;
+      case 'DISTRIBUTED':           return AssetStatus.distributed;
+      case 'DISPUTED_LIQUIDATION':  return AssetStatus.disputedLiquidation;
+      case 'CLOSED':                return AssetStatus.closed;
+      default:                      return AssetStatus.pendingVerification;
+    }
+  }
+
+  String get displayLabel {
+    switch (this) {
+      case AssetStatus.pendingVerification: return 'Menunggu Verifikasi';
+      case AssetStatus.verified:            return 'Terverifikasi';
+      case AssetStatus.rejected:            return 'Ditolak';
+      case AssetStatus.frozen:              return 'Dibekukan';
+      case AssetStatus.unlocked:            return 'Brankas Terbuka';
+      case AssetStatus.liquidating:         return 'Sedang Dicairkan';
+      case AssetStatus.distributed:         return 'Didistribusikan';
+      case AssetStatus.disputedLiquidation: return 'Sengketa';
+      case AssetStatus.closed:              return 'Ditutup';
     }
   }
 }
@@ -55,7 +115,11 @@ class AssetEntity {
   final String platform;
   final String accountIdentifier;
   final AssetStatus status;
+  final String? verifiedByNotarisId;
+  final DateTime? verifiedAt;
   final DateTime createdAt;
+  final DateTime updatedAt;
+  final List<AssetAllocationEntity> allocations;
 
   const AssetEntity({
     required this.id,
@@ -66,6 +130,10 @@ class AssetEntity {
     required this.accountIdentifier,
     required this.status,
     required this.createdAt,
+    required this.updatedAt,
+    this.verifiedByNotarisId,
+    this.verifiedAt,
+    this.allocations = const [],
   });
 
   factory AssetEntity.fromJson(Map<String, dynamic> json) {
@@ -77,9 +145,52 @@ class AssetEntity {
       platform: json['platform'] as String? ?? '',
       accountIdentifier: json['accountIdentifier'] as String? ?? '',
       status: AssetStatus.fromString(json['status'] as String? ?? ''),
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
-          : DateTime.now(),
+      verifiedByNotarisId: json['verifiedByNotarisId'] as String?,
+      verifiedAt: json['verifiedAt'] != null
+          ? DateTime.tryParse(json['verifiedAt'] as String)
+          : null,
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+          DateTime.now(),
+      allocations: (json['allocations'] as List<dynamic>? ?? [])
+          .map((e) => AssetAllocationEntity.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class AssetAllocationEntity {
+  final String id;
+  final String assetId;
+  final String ahliWarisId;
+  final double percentage;
+  final bool isExecutor;
+  final DateTime? acknowledgedAt;
+  final DateTime createdAt;
+
+  const AssetAllocationEntity({
+    required this.id,
+    required this.assetId,
+    required this.ahliWarisId,
+    required this.percentage,
+    required this.isExecutor,
+    required this.createdAt,
+    this.acknowledgedAt,
+  });
+
+  factory AssetAllocationEntity.fromJson(Map<String, dynamic> json) {
+    return AssetAllocationEntity(
+      id: json['id'] as String? ?? '',
+      assetId: json['assetId'] as String? ?? '',
+      ahliWarisId: json['ahliWarisId'] as String? ?? '',
+      percentage: (json['percentage'] as num? ?? 0).toDouble(),
+      isExecutor: json['isExecutor'] as bool? ?? false,
+      acknowledgedAt: json['acknowledgedAt'] != null
+          ? DateTime.tryParse(json['acknowledgedAt'] as String)
+          : null,
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 }
