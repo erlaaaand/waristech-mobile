@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/features/verification/data/datasources/verification_remote_data_source.dart';
 
-final _dataSource = VerificationRemoteDataSource();
+final _ds = VerificationRemoteDataSource();
 
-/// State untuk aksi approve/reject pada satu kartu verifikasi.
+// ---------------------------------------------------------------------------
+// State untuk aksi approve/reject pada satu aset
+// ---------------------------------------------------------------------------
+
 class VerificationActionState {
   final bool isLoading;
   final String? error;
@@ -23,17 +26,18 @@ class VerificationActionState {
       );
 }
 
-/// Notifier untuk aksi Approve/Reject pada satu ID verifikasi.
+/// Notifier untuk aksi Verify/Reject pada satu asset ID.
 class VerificationActionNotifier
     extends StateNotifier<VerificationActionState> {
   VerificationActionNotifier() : super(const VerificationActionState());
 
-  Future<void> approve(String id) => _act(() => _dataSource.approve(id));
+  Future<void> verify(String assetId) =>
+      _act(() => _ds.verifyAsset(assetId));
 
-  Future<void> reject(String id, String reason) =>
-      _act(() => _dataSource.reject(id, reason: reason));
+  Future<void> reject(String assetId) =>
+      _act(() => _ds.rejectAsset(assetId));
 
-  Future<void> _act(Future<void> Function() action) async {
+  Future<void> _act(Future<dynamic> Function() action) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await action();
@@ -44,7 +48,7 @@ class VerificationActionNotifier
   }
 }
 
-/// Provider family — satu notifier per verificationId.
+/// Provider family — satu notifier per assetId.
 final verificationActionProvider = StateNotifierProvider.family
     .autoDispose<VerificationActionNotifier, VerificationActionState, String>(
   (ref, id) => VerificationActionNotifier(),
