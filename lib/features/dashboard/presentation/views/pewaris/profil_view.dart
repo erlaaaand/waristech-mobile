@@ -1,151 +1,118 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wt_mobile/core/theme/app_colors.dart';
-import 'package:wt_mobile/core/widgets/wt_widgets.dart';
+import 'package:wt_mobile/core/theme/theme_provider.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
+import 'package:wt_mobile/features/compliance/presentation/screens/consent_status_screen.dart';
+import 'package:wt_mobile/features/inheritance/presentation/screens/invitations_screen.dart';
+import 'package:wt_mobile/features/users/presentation/screens/edit_profile_screen.dart';
+import 'package:wt_mobile/features/dashboard/presentation/widgets/profil_components.dart';
 
-/// Tab Profil & Audit Trail untuk role Pewaris.
 class PewarisProfilView extends ConsumerWidget {
-  const PewarisProfilView({super.key});
+  final VoidCallback onOpenHeirs;
+  final VoidCallback onOpenProtocol;
 
-  static const _logs = [
-    _LogEntry(date: '26 Agu 2026', title: 'Kunci Akses Dirilis', desc: 'Kunci enkripsi dikirim ke ahli waris terdaftar.', isSuccess: true),
-    _LogEntry(date: '12 Agu 2026', title: 'Verifikasi Notaris Selesai', desc: 'Akta Kematian diunggah dan terverifikasi.', isSuccess: true),
-    _LogEntry(date: '15 Jul 2026', title: 'Notifikasi Darurat Dikirim', desc: 'Kontak darurat tingkat 2 diinisiasi.', isSuccess: false),
-  ];
+  const PewarisProfilView({
+    super.key,
+    required this.onOpenHeirs,
+    required this.onOpenProtocol,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(bottom: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const WtSectionTitle('Akun'),
-          const SizedBox(height: 4),
-          const Text('Profil & Log', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-          const SizedBox(height: 24),
-          _ProfileCard(
-            name: user?.name ?? 'Ahmad Santoso',
-            email: user?.email ?? 'ahmad@email.com',
-          ),
-          const SizedBox(height: 24),
-          const WtSectionTitle('Riwayat Eksekusi'),
-          const SizedBox(height: 12),
-          ..._logs.map((log) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _LogCard(entry: log),
-              )),
+          ProfileHeader(name: user?.name ?? '-', email: user?.email ?? '-'),
           const SizedBox(height: 20),
-          OutlinedButton.icon(
-            onPressed: () async => ref.read(authProvider.notifier).logout(),
-            icon: const Icon(Icons.logout, color: AppColors.danger),
-            label: const Text('Keluar Akun', style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.danger),
-              minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
-// ---------------------------------------------------------------------------
-// Data model
-// ---------------------------------------------------------------------------
-
-class _LogEntry {
-  final String date;
-  final String title;
-  final String desc;
-  final bool isSuccess;
-
-  const _LogEntry({required this.date, required this.title, required this.desc, required this.isSuccess});
-}
-
-// ---------------------------------------------------------------------------
-// Private sub-widgets
-// ---------------------------------------------------------------------------
-
-class _ProfileCard extends StatelessWidget {
-  final String name;
-  final String email;
-  const _ProfileCard({required this.name, required this.email});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.navy,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8))],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.2), shape: BoxShape.circle),
-            alignment: Alignment.center,
-            child: Text(
-              name.isNotEmpty ? name[0].toUpperCase() : '?',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primary),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // ── PERENCANAAN ────────────────────────────────────────────────
+          const SectionLabel('Perencanaan Waris'),
+          SettingsGroup(
             children: [
-              Text(name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white)),
-              const SizedBox(height: 2),
-              Text(email, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white54)),
+              SettingsRow(
+                icon: Icons.gavel_outlined,
+                label: 'Skema Hukum Waris',
+                onTap: onOpenHeirs,
+              ),
+              SettingsRow(
+                icon: Icons.verified_user_outlined,
+                label: 'Protokol Darurat',
+                onTap: onOpenProtocol,
+              ),
+              SettingsRow(
+                icon: Icons.groups_outlined,
+                label: 'Undangan Ahli Waris',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const InvitationsScreen(),
+                  ),
+                ),
+                isLast: true,
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
 
-class _LogCard extends StatelessWidget {
-  final _LogEntry entry;
-  const _LogCard({required this.entry});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final statusColor = entry.isSuccess ? AppColors.success : AppColors.amber;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // ── AKUN ───────────────────────────────────────────────────────
+          const SectionLabel('Akun'),
+          SettingsGroup(
             children: [
-              Text(entry.date,
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: (isDark ? Colors.white : AppColors.navy).withOpacity(0.4), letterSpacing: 1.5)),
-              WtStatusBadge(label: entry.isSuccess ? 'Selesai' : 'Peringatan', color: statusColor),
+              SettingsRow(
+                icon: Icons.person_outline,
+                label: 'Edit Profil',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const EditProfileScreen(),
+                  ),
+                ),
+              ),
+              SettingsRow(
+                icon: Icons.privacy_tip_outlined,
+                label: 'Persetujuan Data Pribadi',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ConsentStatusScreen(),
+                  ),
+                ),
+                isLast: true,
+              ),
             ],
           ),
+
+          // ── PREFERENSI ─────────────────────────────────────────────────
+          const SectionLabel('Preferensi'),
+          SettingsGroup(
+            children: [
+              SettingsRow(
+                icon: isDark ? Icons.light_mode_outlined : Icons.contrast,
+                label: 'Tema',
+                value: isDark ? 'Gelap' : 'Terang',
+                onTap: () => ref.read(themeProvider.notifier).toggle(context),
+                isLast: true,
+              ),
+            ],
+          ),
+
+          // ── RIWAYAT AKTIVITAS ──────────────────────────────────────────
+          const SectionLabel('Riwayat Aktivitas'),
+          const ActivityTimeline(),
+
           const SizedBox(height: 8),
-          Text(entry.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(entry.desc,
-              style: TextStyle(fontSize: 12, color: (isDark ? Colors.white : AppColors.navy).withOpacity(0.6), height: 1.4)),
+          SettingsGroup(
+            children: [
+              SettingsRow(
+                icon: Icons.logout,
+                label: 'Keluar',
+                isMuted: true,
+                onTap: () async => ref.read(authProvider.notifier).logout(),
+                isLast: true,
+              ),
+            ],
+          ),
         ],
       ),
     );

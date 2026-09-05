@@ -1,0 +1,21 @@
+flutter_native_splash:
+  # Splash native (dirender OS SEBELUM Flutter engine boot) — sengaja hanya
+  # warna solid, bukan logo. Asset logo yang ada (`assets/logo.svg`) adalah
+  # vektor; splash native butuh raster (PNG), dan proyek ini belum punya
+  # versi PNG-nya. Logo tetap tampil sesaat setelah ini, di layar
+  # `SplashScreen` (lihat `app_router.dart`) yang me-render `WtLogo` (SVG)
+  # via flutter_svg dengan warna latar yang SAMA — transisi jadi mulus,
+  # tanpa "kedipan" warna antara splash native dan splash Flutter.
+  #
+  # Warna mengikuti tema monokrom prototipe (`mobile.css`): hitam pekat,
+  # bukan navy biru versi lama.
+  color: "#000000"
+  color_dark: "#000000"
+
+  android_12:
+    color: "#000000"
+    color_dark: "#000000"
+
+  android: true
+  ios: true
+  web: false

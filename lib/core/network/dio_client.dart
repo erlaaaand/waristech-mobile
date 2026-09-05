@@ -20,13 +20,21 @@ class DioClient {
     dio = Dio(
       BaseOptions(
         baseUrl:
-            dotenv.env['API_MAIN_URL'] ?? 'http://192.168.1.6:3001/api/v1',
+            dotenv.env['API_MAIN_URL'] ?? 'https://waristech-backend-production.up.railway.app/api/v1',
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: const {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'x-client': 'mobile',
         },
+        // WAJIB untuk Flutter Web: tanpa ini browser tidak akan mengirim
+        // ATAU menyimpan cookie HttpOnly `accessToken` pada request
+        // cross-origin (mis. web dev server di localhost:PORT memanggil
+        // backend di IP/port lain) — sesi login akan terlihat gagal total.
+        // Diabaikan dengan aman di platform non-web (IO adapter tidak
+        // membaca key ini).
+        extra: const {'withCredentials': true},
       ),
     );
 
@@ -47,6 +55,19 @@ class DioClient {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    // Pastikan baseUrl selalu berakhiran '/' dan path tidak diawali '/'
+    // agar Dio tidak menghapus prefix '/api/v1' saat menyelesaikan URL
+    final envUrl = dotenv.env['API_MAIN_URL'];
+    if (envUrl != null && envUrl.isNotEmpty) {
+      options.baseUrl = envUrl.endsWith('/') ? envUrl : '$envUrl/';
+    } else if (!options.baseUrl.endsWith('/')) {
+      options.baseUrl = '${options.baseUrl}/';
+    }
+
+    if (options.path.startsWith('/')) {
+      options.path = options.path.substring(1);
+    }
+
     final token = await _storage.read(key: 'accessToken');
     final csrfToken = await _storage.read(key: 'csrfToken');
     final csrfCookie = await _storage.read(key: 'csrfCookie');
@@ -68,7 +89,7 @@ class DioClient {
   }
 
   Future<void> _onResponse(
-    Response response,
+    Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) async {
     final setCookies = response.headers.map['set-cookie'];
@@ -77,10 +98,14 @@ class DioClient {
         final kv = cookie.split(';').first.trim();
         if (kv.startsWith('accessToken=')) {
           final val = kv.substring('accessToken='.length);
-          if (val.isNotEmpty) await _storage.write(key: 'accessToken', value: val);
+          if (val.isNotEmpty) {
+            await _storage.write(key: 'accessToken', value: val);
+          }
         } else if (kv.startsWith('x-csrf-token=')) {
           final val = kv.substring('x-csrf-token='.length);
-          if (val.isNotEmpty) await _storage.write(key: 'csrfCookie', value: val);
+          if (val.isNotEmpty) {
+            await _storage.write(key: 'csrfCookie', value: val);
+          }
         }
       }
     }

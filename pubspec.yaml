@@ -40,12 +40,15 @@ dependencies:
   google_fonts: ^8.2.1
   flutter_svg: ^2.3.0
   file_picker: ^8.1.4
+  pointycastle: ^4.0.0
+  basic_utils: ^5.8.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.8
 
 dependency_overrides:
   flutter_plugin_android_lifecycle: 2.0.20

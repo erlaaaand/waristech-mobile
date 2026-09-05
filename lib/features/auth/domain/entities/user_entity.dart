@@ -4,7 +4,9 @@ enum UserRole {
   basic,
   pewaris,
   ahliWaris,
-  notaris; // backend menyebutnya NOTARIS, bukan VERIFIKATOR
+  notaris,
+  admin,
+  guest;
 
   /// Konversi string dari backend ke enum [UserRole].
   static UserRole fromBackendString(String? value) {
@@ -15,6 +17,10 @@ enum UserRole {
         return UserRole.ahliWaris;
       case 'NOTARIS':
         return UserRole.notaris;
+      case 'ADMIN':
+        return UserRole.admin;
+      case 'GUEST':
+        return UserRole.guest;
       default:
         return UserRole.basic;
     }
@@ -43,6 +49,10 @@ enum UserRole {
         return 'Ahli Waris';
       case UserRole.notaris:
         return 'Notaris';
+      case UserRole.admin:
+        return 'Administrator';
+      case UserRole.guest:
+        return 'Tamu';
       default:
         return 'Pengguna';
     }
@@ -77,7 +87,8 @@ class UserEntity {
 
     return UserEntity(
       id: userData['id']?.toString() ?? '',
-      name: userData['fullName']?.toString() ??
+      name:
+          userData['fullName']?.toString() ??
           userData['name']?.toString() ??
           userData['email']?.toString() ??
           'User',

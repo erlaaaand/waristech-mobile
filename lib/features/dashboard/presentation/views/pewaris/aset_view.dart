@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
-import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
 import 'package:wt_mobile/features/assets/presentation/providers/asset_provider.dart';
+import 'package:wt_mobile/features/dashboard/presentation/widgets/aset_list_header.dart';
+import 'package:wt_mobile/features/dashboard/presentation/widgets/asset_item.dart';
 
-/// Tab Aset untuk role Pewaris.
-/// Menampilkan daftar aset dari backend dengan filter kategori.
 class PewarisAsetView extends ConsumerStatefulWidget {
   const PewarisAsetView({super.key});
 
@@ -15,226 +15,105 @@ class PewarisAsetView extends ConsumerStatefulWidget {
 }
 
 class _PewarisAsetViewState extends ConsumerState<PewarisAsetView> {
-  String _selectedCategory = 'Semua';
-
-  static const _categories = ['Semua', 'Crypto', 'E-Wallet', 'Bank', 'Emas', 'Saham'];
+  String _query = '';
+  bool _revealed = false;
 
   @override
   Widget build(BuildContext context) {
     final assetsAsync = ref.watch(myAssetsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const WtSectionTitle('Inventarisasi'),
-            const SizedBox(height: 4),
-            const Text('Aset Digital', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-            const SizedBox(height: 16),
-            _SearchBar(),
-            const SizedBox(height: 20),
-            _CategoryFilter(
-              categories: _categories,
-              selected: _selectedCategory,
-              onSelected: (cat) => setState(() => _selectedCategory = cat),
+      backgroundColor: Colors.transparent,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 90),
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: FloatingActionButton(
+            onPressed: () => context.pushNamed('create-asset'),
+            backgroundColor: isDark ? Colors.white : Colors.black,
+            foregroundColor: isDark ? Colors.black : Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
-            const SizedBox(height: 20),
-            _AssetList(assetsAsync: assetsAsync),
-          ],
+            child: const Icon(Icons.add, size: 24),
+          ),
         ),
       ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Private sub-widgets
-// ---------------------------------------------------------------------------
-
-class _SearchBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'Cari aset...',
-        prefixIcon: const Icon(Icons.search),
-        filled: true,
-        fillColor: isDark ? AppColors.darkSurface : AppColors.surface,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-      ),
-    );
-  }
-}
-
-class _CategoryFilter extends StatelessWidget {
-  final List<String> categories;
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  const _CategoryFilter({required this.categories, required this.selected, required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: categories.map((cat) {
-          final isActive = cat == selected;
-          return GestureDetector(
-            onTap: () => onSelected(cat),
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: isActive ? AppColors.navy : (isDark ? AppColors.darkSurface : AppColors.surface),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                cat,
-                style: TextStyle(
-                  color: isActive ? Colors.white : (isDark ? Colors.white54 : AppColors.navy.withOpacity(0.8)),
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-class _AssetList extends StatelessWidget {
-  final AsyncValue<List<AssetEntity>> assetsAsync;
-  const _AssetList({required this.assetsAsync});
-
-  @override
-  Widget build(BuildContext context) {
-    return assetsAsync.when(
-      loading: () => const Center(
-        child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()),
-      ),
-      error: (err, _) => _ErrorBanner(message: err.toString()),
-      data: (assets) {
-        if (assets.isEmpty) {
-          return const _EmptyState();
-        }
-        return ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: assets.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (_, i) => _AssetCard(asset: assets[i]),
-        );
-      },
-    );
-  }
-}
-
-class _AssetCard extends StatelessWidget {
-  final AssetEntity asset;
-  const _AssetCard({required this.asset});
-
-  static (IconData, Color) _iconForType(AssetType type) {
-    switch (type) {
-      case AssetType.crypto:        return (Icons.currency_bitcoin, AppColors.amber);
-      case AssetType.saham:         return (Icons.show_chart, Colors.green);
-      case AssetType.reksaDana:     return (Icons.pie_chart, Colors.teal);
-      case AssetType.obligasi:      return (Icons.receipt_long, Colors.indigo);
-      case AssetType.eWallet:       return (Icons.account_balance_wallet, const Color(0xFF00AED6));
-      case AssetType.rekeningBank:  return (Icons.account_balance, Colors.green);
-      case AssetType.asuransiJiwa:  return (Icons.health_and_safety, Colors.red);
-      case AssetType.p2pLending:    return (Icons.handshake, Colors.orange);
-      case AssetType.emasDigital:   return (Icons.star, const Color(0xFFFFD700));
-      case AssetType.nft:           return (Icons.image, Colors.purple);
-      case AssetType.domainWebsite: return (Icons.language, Colors.blue);
-      case AssetType.lainnya:       return (Icons.cloud, Colors.grey);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final (icon, color) = _iconForType(asset.type);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(14)),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(asset.assetName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 2),
-                Text('${asset.type.displayName} • Terenkripsi',
-                    style: TextStyle(color: (isDark ? Colors.white : AppColors.navy).withOpacity(0.6), fontSize: 12)),
+                VaultHeader(
+                  isRevealed: _revealed,
+                  onToggle: () => setState(() => _revealed = !_revealed),
+                ),
+                const MaskInfoBanner(),
+                const SizedBox(height: 14),
+                SearchField(onChanged: (v) => setState(() => _query = v)),
+                const SizedBox(height: 14),
               ],
             ),
           ),
-          WtStatusBadge(label: '🔒 Aman', color: AppColors.success),
+          assetsAsync.when(
+            loading: () => const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+            error: (err, _) => SliverToBoxAdapter(
+              child: WtErrorBanner(
+                message: err.toString(),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                borderRadius: 12,
+                iconSize: 20,
+                textStyle: const TextStyle(fontSize: 13),
+              ),
+            ),
+            data: (assets) {
+              final filtered = _query.isEmpty
+                  ? assets
+                  : assets
+                        .where(
+                          (a) =>
+                              a.assetName.toLowerCase().contains(_query) ||
+                              a.platform.toLowerCase().contains(_query) ||
+                              a.type.displayName.toLowerCase().contains(_query),
+                        )
+                        .toList();
+              if (filtered.isEmpty) {
+                return const SliverToBoxAdapter(
+                  child: WtEmptyState(
+                    message: 'Belum ada aset terdaftar.',
+                    icon: Icons.inventory_2_outlined,
+                    iconSize: 44,
+                    iconColor: AppColors.gray300,
+                    padding: EdgeInsets.all(40),
+                    messageStyle: TextStyle(
+                      color: AppColors.gray500,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              }
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 140),
+                sliver: SliverList.separated(
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) =>
+                      AssetItem(asset: filtered[i], isRevealed: _revealed),
+                ),
+              );
+            },
+          ),
         ],
-      ),
-    );
-  }
-}
-
-class _ErrorBanner extends StatelessWidget {
-  final String message;
-  const _ErrorBanner({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.danger.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, color: AppColors.danger),
-          const SizedBox(width: 12),
-          Expanded(child: Text(message, style: const TextStyle(color: AppColors.danger))),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          children: [
-            Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey),
-            SizedBox(height: 12),
-            Text('Belum ada aset terdaftar.', style: TextStyle(color: Colors.grey)),
-          ],
-        ),
       ),
     );
   }

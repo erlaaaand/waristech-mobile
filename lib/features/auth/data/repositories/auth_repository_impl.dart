@@ -18,16 +18,17 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity?> getMe() async {
     try {
       final json = await _dataSource.getMe();
-      // GET /auth/me mengembalikan { userId, email, role, ... }
-      // Normalisasi ke format yang bisa diproses fromBackendJson
+      // GET /auth/me mengembalikan klaim JWT saja: { sub, email, role }.
+      // TIDAK ada fullName di sini — biarkan null (bukan '') agar
+      // fromBackendJson jatuh ke fallback email/'User', bukan nama kosong.
       final normalized = {
         'user': {
           'id': json['userId'] ?? json['id'] ?? json['sub'] ?? '',
           'email': json['email'] ?? '',
-          'fullName': json['fullName'] ?? json['name'] ?? '',
+          'fullName': json['fullName'] ?? json['name'],
           'role': json['role'] ?? '',
           'avatarUrl': json['avatarUrl'],
-        }
+        },
       };
       return UserEntity.fromBackendJson(normalized);
     } catch (_) {
@@ -39,5 +40,72 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     await _dataSource.logout();
     await DioClient().clearSession();
+  }
+
+  @override
+  Future<void> registerPewaris({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phoneNumber,
+    required String nik,
+    required bool consentAgreed,
+  }) {
+    return _dataSource.registerPewaris(
+      email: email,
+      password: password,
+      fullName: fullName,
+      phoneNumber: phoneNumber,
+      nik: nik,
+      consentAgreed: consentAgreed,
+    );
+  }
+
+  @override
+  Future<void> registerAhliWaris({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phoneNumber,
+    required String invitationCode,
+    required bool consentAgreed,
+  }) {
+    return _dataSource.registerAhliWaris(
+      email: email,
+      password: password,
+      fullName: fullName,
+      phoneNumber: phoneNumber,
+      invitationCode: invitationCode,
+      consentAgreed: consentAgreed,
+    );
+  }
+
+  @override
+  Future<UserEntity> verifyEmail(String email, String otp) async {
+    final json = await _dataSource.verifyEmail(email, otp);
+    return UserEntity.fromBackendJson(json);
+  }
+
+  @override
+  Future<void> resendOtp(String email) => _dataSource.resendOtp(email);
+
+  @override
+  Future<String> forgotPassword(String email) =>
+      _dataSource.forgotPassword(email);
+
+  @override
+  Future<String> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) => _dataSource.resetPassword(email: email, otp: otp, newPassword: newPassword);
+
+  @override
+  Future<UserEntity> verifyMagicLink({
+    required String token,
+    required String otp,
+  }) async {
+    final json = await _dataSource.verifyMagicLink(token: token, otp: otp);
+    return UserEntity.fromBackendJson(json);
   }
 }
