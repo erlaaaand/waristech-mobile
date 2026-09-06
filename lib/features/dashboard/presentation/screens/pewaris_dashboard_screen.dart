@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/aset_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/home_view.dart';
@@ -54,7 +55,10 @@ class _PewarisDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.gray50,
       // Prototipe tidak punya top app bar terpisah — baris sapaan/judul
       // adalah bagian dari konten yang ikut scroll di tiap tab. Karena tidak
       // ada AppBar yang biasanya menyisihkan area status bar, konten WAJIB
