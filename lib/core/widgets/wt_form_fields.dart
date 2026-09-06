@@ -294,3 +294,91 @@ class WtConsentCheckbox extends StatelessWidget {
     );
   }
 }
+
+/// Dropdown field dengan gaya yang persis sama dengan [WtFormField]
+class WtDropdownField<T> extends StatelessWidget {
+  final String label;
+  final T? value;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?> onChanged;
+  final String? Function(T?)? validator;
+
+  const WtDropdownField({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.4)
+                : AppColors.navy.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<T>(
+          value: value,
+          items: items,
+          onChanged: onChanged,
+          validator: validator,
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: isDark ? Colors.white70 : AppColors.gray500,
+          ),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white : AppColors.navy,
+          ),
+          dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            filled: true,
+            fillColor: isDark
+                ? AppColors.navy.withValues(alpha: 0.2)
+                : AppColors.warm,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: (isDark ? Colors.white : AppColors.navy).withValues(
+                  alpha: 0.1,
+                ),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: (isDark ? Colors.white : AppColors.navy).withValues(
+                  alpha: 0.1,
+                ),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -242,13 +242,9 @@ class _AssetTypeDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<AssetType>(
-      initialValue: value,
-      decoration: InputDecoration(
-        labelText: 'Jenis Aset',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-        filled: true,
-      ),
+    return WtDropdownField<AssetType>(
+      label: 'Jenis Aset',
+      value: value,
       items: AssetType.values
           .map(
             (t) => DropdownMenuItem<AssetType>(
@@ -390,13 +386,9 @@ class _NotarisSelector extends ConsumerWidget {
 
     return asyncNotaries.when(
       data: (notaries) {
-        return DropdownButtonFormField<String>(
-          initialValue: value,
-          decoration: InputDecoration(
-            labelText: 'Notaris Pemeriksa',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-            filled: true,
-          ),
+        return WtDropdownField<String>(
+          label: 'Notaris Pemeriksa',
+          value: value,
           items: notaries.map((n) {
             return DropdownMenuItem<String>(
               value: n['id'] as String,
