@@ -21,8 +21,8 @@ class DioClient {
       BaseOptions(
         baseUrl:
             dotenv.env['API_MAIN_URL'] ?? 'https://waristech-backend-production.up.railway.app/api/v1',
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
         headers: const {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
