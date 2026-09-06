@@ -322,6 +322,7 @@ class _MemberDropdown extends StatelessWidget {
     }
     return DropdownButtonFormField<String>(
       initialValue: selectedId,
+      isExpanded: true,
       decoration: InputDecoration(
         labelText: 'Ahli Waris',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
