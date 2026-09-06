@@ -92,6 +92,7 @@ class WtBottomNav extends StatelessWidget {
                       ],
                     ),
                     child: Stack(
+                      alignment: Alignment.center,
                       children: [
                         // Sliding Active Indicator
                         AnimatedPositioned(
@@ -179,8 +180,7 @@ class _NavItemState extends State<_NavItem> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
-          // Subtle upward nudge when active
-          transform: Matrix4.translationValues(0, isActive ? -2 : 0, 0),
+          // Subtle animation already handled by Scale and Icon size changes
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.center,
