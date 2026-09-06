@@ -33,11 +33,10 @@ class AuthRemoteDataSource extends BaseRemoteDataSource {
     });
   }
 
-  /// GET /auth/me — verifikasi token yang tersimpan masih valid.
-  /// Backend mengembalikan: { userId, email, role, ... }
+  /// GET /users/me — ambil profil lengkap pengguna dari database.
   Future<Map<String, dynamic>> getMe() {
     return safeCall(() async {
-      final response = await dio.get<dynamic>('/auth/me');
+      final response = await dio.get<dynamic>('/users/me');
       return response.data as Map<String, dynamic>;
     });
   }

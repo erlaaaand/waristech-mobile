@@ -78,8 +78,7 @@ class UserEntity {
     this.avatarUrl,
   });
 
-  /// Buat [UserEntity] dari respons login backend.
-  /// Backend login response: { message, user: { id, email, fullName, role } }
+  /// Buat [UserEntity] dari respons login/me/profile backend.
   factory UserEntity.fromBackendJson(Map<String, dynamic> raw) {
     // Tangani wrapper data dari TransformInterceptor
     final envelope = raw['data'] ?? raw;
@@ -87,15 +86,27 @@ class UserEntity {
         ? (envelope['user'] as Map<String, dynamic>? ?? envelope)
         : raw);
 
+    final rawFullName = userData['fullName']?.toString().trim();
+    final rawName = userData['name']?.toString().trim();
+    final rawEmail = userData['email']?.toString().trim();
+
+    String resolvedName = 'Pengguna';
+    if (rawFullName != null && rawFullName.isNotEmpty) {
+      resolvedName = rawFullName;
+    } else if (rawName != null && rawName.isNotEmpty) {
+      resolvedName = rawName;
+    } else if (rawEmail != null && rawEmail.isNotEmpty) {
+      resolvedName = rawEmail;
+    }
+
+    final rawPhone = userData['phoneNumber']?.toString().trim() ??
+        userData['phone']?.toString().trim();
+
     return UserEntity(
-      id: userData['id']?.toString() ?? '',
-      name:
-          userData['fullName']?.toString() ??
-          userData['name']?.toString() ??
-          userData['email']?.toString() ??
-          'User',
-      email: userData['email']?.toString() ?? '',
-      phone: userData['phone']?.toString(),
+      id: userData['id']?.toString() ?? userData['sub']?.toString() ?? '',
+      name: resolvedName,
+      email: rawEmail ?? '',
+      phone: (rawPhone != null && rawPhone.isNotEmpty) ? rawPhone : null,
       role: UserRole.fromBackendString(userData['role']?.toString()),
       avatarUrl: userData['avatarUrl']?.toString(),
     );

@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/crypto/rsa_keypair_service.dart';
+import 'package:wt_mobile/features/auth/domain/entities/user_entity.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:wt_mobile/features/users/data/datasources/user_remote_data_source.dart';
 
 final _ds = UserRemoteDataSource();
 
-/// Notifier edit profil (nama & kata sandi) — PATCH /users/:id. Setelah
-/// sukses, memuat ulang [authProvider] supaya nama baru langsung tampil.
+/// Notifier edit profil (nama, email, phone & kata sandi) — PATCH /users/:id.
+/// Setelah sukses, memperbarui [authProvider] dengan data user terbaru.
 class UpdateProfileNotifier extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
   UpdateProfileNotifier(this._ref) : super(const AsyncValue.data(null));
@@ -20,17 +21,26 @@ class UpdateProfileNotifier extends StateNotifier<AsyncValue<void>> {
     String? newPassword,
   }) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => _ds.updateProfile(
+    Map<String, dynamic>? updatedJson;
+    state = await AsyncValue.guard(() async {
+      updatedJson = await _ds.updateProfile(
         userId: userId,
         fullName: fullName,
         email: email,
         phone: phone,
         currentPassword: currentPassword,
         newPassword: newPassword,
-      ),
-    );
-    if (!state.hasError) await _ref.read(authProvider.notifier).refreshUser();
+      );
+    });
+    if (!state.hasError) {
+      if (updatedJson != null) {
+        try {
+          final updatedUser = UserEntity.fromBackendJson(updatedJson!);
+          _ref.read(authProvider.notifier).setUser(updatedUser);
+        } catch (_) {}
+      }
+      await _ref.read(authProvider.notifier).refreshUser();
+    }
   }
 }
 
@@ -46,8 +56,19 @@ class UpdateAvatarNotifier extends StateNotifier<AsyncValue<void>> {
 
   Future<void> update(String avatarUrl) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _ds.updateAvatar(avatarUrl));
-    if (!state.hasError) await _ref.read(authProvider.notifier).refreshUser();
+    Map<String, dynamic>? updatedJson;
+    state = await AsyncValue.guard(() async {
+      updatedJson = await _ds.updateAvatar(avatarUrl);
+    });
+    if (!state.hasError) {
+      if (updatedJson != null) {
+        try {
+          final updatedUser = UserEntity.fromBackendJson(updatedJson!);
+          _ref.read(authProvider.notifier).setUser(updatedUser);
+        } catch (_) {}
+      }
+      await _ref.read(authProvider.notifier).refreshUser();
+    }
   }
 }
 

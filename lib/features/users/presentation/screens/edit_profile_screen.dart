@@ -146,9 +146,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         alignment: Alignment.center,
                         child: user?.avatarUrl == null
                             ? Text(
-                                (user?.name.isNotEmpty ?? false)
-                                    ? user!.name[0].toUpperCase()
-                                    : '?',
+                                (user != null && user.name.trim().isNotEmpty)
+                                    ? user.name.trim()[0].toUpperCase()
+                                    : 'P',
                                 style: TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w800,

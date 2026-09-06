@@ -18,19 +18,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity?> getMe() async {
     try {
       final json = await _dataSource.getMe();
-      // GET /auth/me mengembalikan klaim JWT saja: { sub, email, role }.
-      // TIDAK ada fullName di sini — biarkan null (bukan '') agar
-      // fromBackendJson jatuh ke fallback email/'User', bukan nama kosong.
-      final normalized = {
-        'user': {
-          'id': json['userId'] ?? json['id'] ?? json['sub'] ?? '',
-          'email': json['email'] ?? '',
-          'fullName': json['fullName'] ?? json['name'],
-          'role': json['role'] ?? '',
-          'avatarUrl': json['avatarUrl'],
-        },
-      };
-      return UserEntity.fromBackendJson(normalized);
+      return UserEntity.fromBackendJson(json);
     } catch (_) {
       return null;
     }

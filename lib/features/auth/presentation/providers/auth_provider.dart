@@ -77,6 +77,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
     }
   }
 
+  /// Atur secara langsung [UserEntity] di state auth (misal setelah edit profil).
+  void setUser(UserEntity user) {
+    state = AsyncValue.data(user);
+  }
+
   /// Logout dan hapus sesi pengguna.
   Future<void> logout() async {
     await _repository.logout();

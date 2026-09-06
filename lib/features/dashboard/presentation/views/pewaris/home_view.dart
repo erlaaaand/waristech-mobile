@@ -73,9 +73,9 @@ class PewarisHomeView extends ConsumerWidget {
                                   ? AppColors.darkSurface
                                   : AppColors.gray200,
                               child: Text(
-                                userName.isNotEmpty
-                                    ? userName[0].toUpperCase()
-                                    : '?',
+                                (userName.trim().isNotEmpty)
+                                    ? userName.trim()[0].toUpperCase()
+                                    : 'P',
                                 style: TextStyle(
                                   color: isDark
                                       ? Colors.white
