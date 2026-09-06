@@ -11,7 +11,8 @@ import 'package:wt_mobile/features/assets/domain/repositories/asset_repository.d
 final notariesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final dio = DioClient().dio;
   final response = await dio.get<dynamic>('/users/notaries');
-  final data = response.data;
+  final responseData = response.data as Map<String, dynamic>;
+  final data = responseData['data'];
   return (data as List).cast<Map<String, dynamic>>();
 });
 
