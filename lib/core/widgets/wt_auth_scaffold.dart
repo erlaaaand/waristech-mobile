@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_decorative.dart';
 
@@ -31,7 +32,21 @@ class WtAuthScaffold extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: showBackButton,
       appBar: showBackButton
-          ? AppBar(backgroundColor: Colors.transparent, elevation: 0)
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    // Fallback aman jika rute dibuka dengan context.go (stack kosong)
+                    context.go('/login');
+                  }
+                },
+              ),
+            )
           : null,
       body: Stack(
         children: [

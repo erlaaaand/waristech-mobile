@@ -33,24 +33,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final user = authState.valueOrNull;
       // Rute alur login/registrasi — boleh diakses TANPA sesi aktif, tapi
       // begitu sudah login harus diarahkan pergi (bukan tempat yang relevan).
-      const authOnlyPublicRoutes = {
-        '/login',
-        '/register/pewaris',
-        '/register/ahli-waris',
-        '/verify-email',
-        '/forgot-password',
-        '/reset-password',
-      };
       // Rute alur Guest (Saksi via magic link) — di luar shell dashboard.
       // Boleh diakses TANPA sesi aktif (baru mau verifikasi OTP) DAN TETAP
       // boleh diakses SETELAH sesi Guest terbentuk (lanjut ke keputusan) —
       // Guest.dashboardRoute jatuh ke 'login' sehingga tidak boleh dianggap
       // sebagai rute yang harus "dibuang" begitu login seperti authOnlyPublicRoutes.
-      const guestFlowRoutes = {'/verifikasi/saksi'};
-
       final path = state.uri.path;
-      final isAuthOnlyPublic = authOnlyPublicRoutes.contains(path);
-      final isGuestFlow = guestFlowRoutes.contains(path);
+      final isAuthOnlyPublic = path.startsWith('/login') ||
+          path.startsWith('/register') ||
+          path.startsWith('/verify-email') ||
+          path.startsWith('/forgot-password') ||
+          path.startsWith('/reset-password');
+      final isGuestFlow = path.startsWith('/verifikasi/saksi');
 
       // Belum login dan bukan di rute publik (auth ATAU guest) -> ke login
       if (user == null && !isAuthOnlyPublic && !isGuestFlow) return '/login';

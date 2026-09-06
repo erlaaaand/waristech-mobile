@@ -194,7 +194,7 @@ class _ForgotPasswordLink extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () => context.push('/forgot-password'),
+        onPressed: () => context.go('/forgot-password'),
         child: Text(
           'Lupa Kata Sandi?',
           style: TextStyle(
@@ -225,7 +225,7 @@ class _RegisterLink extends StatelessWidget {
           ),
         ),
         TextButton(
-          onPressed: () => context.push('/register/pewaris'),
+          onPressed: () => context.go('/register/pewaris'),
           child: Text(
             'Daftar Sekarang',
             style: TextStyle(
