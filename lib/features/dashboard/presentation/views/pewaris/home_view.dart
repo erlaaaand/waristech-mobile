@@ -24,6 +24,7 @@ class PewarisHomeView extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userName = ref.watch(authProvider).value?.name ?? 'Pengguna';
     final assetsAsync = ref.watch(myAssetsProvider);
+    final statusAsync = ref.watch(proofOfLifeStatusProvider);
     final checkInState = ref.watch(checkInProvider);
 
     ref.listen<AsyncValue<DateTime?>>(checkInProvider, (previous, next) {
@@ -154,6 +155,14 @@ class PewarisHomeView extends ConsumerWidget {
                     QuickActionsRow(
                       onOpenAssets: onOpenAssets,
                       onOpenHeirs: onOpenHeirs,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 4. Proof of Life Card
+                    ProofOfLifeCard(
+                      statusState: statusAsync,
+                      isLoading: checkInState.isLoading,
                       onCheckIn: () {
                         if (!checkInState.isLoading) {
                           ref.read(checkInProvider.notifier).checkIn();
@@ -161,9 +170,9 @@ class PewarisHomeView extends ConsumerWidget {
                       },
                     ),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
-                    // 4. Ahli Waris (Quick Send Replacement)
+                    // 5. Ahli Waris (Quick Send Replacement)
                     AhliWarisSection(onOpenHeirs: onOpenHeirs),
                   ],
                 ),

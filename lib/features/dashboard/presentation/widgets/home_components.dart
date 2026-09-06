@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
+import 'package:wt_mobile/features/proof_of_life/domain/entities/proof_of_life_status_entity.dart';
 
 class SavedAssetsHeroCard extends StatelessWidget {
   final AsyncValue<List<AssetEntity>> assetsAsync;
@@ -18,167 +19,225 @@ class SavedAssetsHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onOpenAssets,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.gray900,
-          borderRadius: BorderRadius.circular(28),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            colors: [AppColors.primaryDark, AppColors.primaryDeep],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'MY ASSETS',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                Icon(
-                  Icons.shield_outlined,
-                  color: Colors.white.withValues(alpha: 0.5),
-                  size: 20,
-                ),
+      child: AspectRatio(
+        aspectRatio: 1.586, // Standar rasio credit card
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.primaryDark,
+                AppColors.primary,
+                AppColors.primaryDeep,
               ],
+              stops: [0.0, 0.5, 1.0],
             ),
-            const SizedBox(height: 24),
-            assetsAsync.when(
-              loading: () => const SizedBox(
-                height: 60,
-                child: Center(
-                  child: CircularProgressIndicator(color: Colors.white54),
-                ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryDeep.withValues(alpha: 0.3),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
               ),
-              error: (err, _) => SizedBox(
-                height: 60,
-                child: Center(
-                  child: Text(
-                    err.toString(),
-                    style: const TextStyle(color: AppColors.danger),
-                  ),
-                ),
-              ),
-              data: (assets) {
-                if (assets.isEmpty) {
-                  return const SizedBox(
-                    height: 60,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Belum ada aset tersimpan',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Ketuk untuk mulai menyusun brankas Anda',
-                          style: TextStyle(color: Colors.white54, fontSize: 13),
-                        ),
+            ],
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.15),
+              width: 1,
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Efek pantulan cahaya (glassmorphism highlight)
+              Positioned(
+                top: -30,
+                right: -20,
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.white.withValues(alpha: 0.15),
+                        Colors.transparent,
                       ],
                     ),
-                  );
-                }
-
-                final recentAsset = assets.first;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      recentAsset.platform.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top section: Logo and Chip
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Chip icon
+                      Container(
+                        width: 42,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLightest.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppColors.primaryLightest.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.sim_card,
+                          color: AppColors.primaryLightest.withValues(alpha: 0.8),
+                          size: 20,
+                        ),
+                      ),
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.shield_outlined,
+                            color: Colors.white70,
+                            size: 16,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'WARISTECH',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  
+                  // Middle section: Data
+                  assetsAsync.when(
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(color: Colors.white54),
+                    ),
+                    error: (err, _) => Center(
+                      child: Text(
+                        err.toString(),
+                        style: const TextStyle(color: AppColors.danger),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      recentAsset.accountIdentifier.isNotEmpty
-                          ? recentAsset.accountIdentifier
-                          : recentAsset.assetName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Column(
+                    data: (assets) {
+                      if (assets.isEmpty) {
+                        return const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Total Aset',
+                            Text(
+                              'NO ASSETS SECURED',
                               style: TextStyle(
                                 color: Colors.white54,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                                letterSpacing: 2,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 8),
                             Text(
-                              '${assets.length} ASET',
+                              'Ketuk untuk tambah',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      final recentAsset = assets.first;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            recentAsset.platform.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            recentAsset.accountIdentifier.isNotEmpty
+                                ? recentAsset.accountIdentifier
+                                : recentAsset.assetName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.5,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  
+                  // Bottom section: Footer info
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'TOTAL ASET',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          assetsAsync.maybeWhen(
+                            data: (assets) => Text(
+                              '${assets.length} ITEM SECURED',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
+                                letterSpacing: 1,
                               ),
                             ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: const Text(
-                            'Lihat Detail',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                            orElse: () => const Text(
+                              '0 ITEM SECURED',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+                        ],
+                      ),
+                      const Icon(
+                        Icons.contactless_outlined,
+                        color: Colors.white70,
+                        size: 28,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -188,13 +247,11 @@ class SavedAssetsHeroCard extends StatelessWidget {
 class QuickActionsRow extends StatelessWidget {
   final VoidCallback onOpenAssets;
   final VoidCallback onOpenHeirs;
-  final VoidCallback onCheckIn;
 
   const QuickActionsRow({
     super.key,
     required this.onOpenAssets,
     required this.onOpenHeirs,
-    required this.onCheckIn,
   });
 
   @override
@@ -206,7 +263,7 @@ class QuickActionsRow extends StatelessWidget {
         children: [
           _ActionItem(
             icon: Icons.account_balance_wallet_outlined,
-            label: 'Aset',
+            label: 'Brankas',
             onTap: onOpenAssets,
           ),
           _ActionItem(
@@ -215,11 +272,163 @@ class QuickActionsRow extends StatelessWidget {
             onTap: onOpenHeirs,
           ),
           _ActionItem(
-            icon: Icons.fact_check_outlined,
-            label: 'Check-In',
-            onTap: onCheckIn,
+            icon: Icons.description_outlined,
+            label: 'Protokol',
+            onTap: () {},
           ),
           _ActionItem(icon: Icons.more_horiz, label: 'Lainnya', onTap: () {}),
+        ],
+      ),
+    );
+  }
+}
+
+class ProofOfLifeCard extends StatelessWidget {
+  final AsyncValue<ProofOfLifeStatusEntity> statusState;
+  final VoidCallback onCheckIn;
+  final bool isLoading;
+
+  const ProofOfLifeCard({
+    super.key,
+    required this.statusState,
+    required this.onCheckIn,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.primaryDeep : AppColors.primaryLightest.withValues(alpha: 0.5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: isDark ? 0.1 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLightest.withValues(alpha: isDark ? 0.1 : 0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.fingerprint,
+                  color: isDark ? AppColors.primaryLightest : AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Proof of Life (Kehadiran)',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : AppColors.gray900,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    statusState.when(
+                      data: (status) {
+                        final date = status.lastCheckInAt;
+                        final daysLeft = status.daysUntilDue;
+                        final isWarning = daysLeft <= 7;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Terakhir: ${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
+                              style: const TextStyle(
+                                color: AppColors.success,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              daysLeft > 0
+                                  ? '$daysLeft hari tersisa untuk Check-in'
+                                  : 'Sistem darurat akan segera diaktifkan!',
+                              style: TextStyle(
+                                color: daysLeft > 0
+                                    ? (isWarning ? AppColors.danger : (isDark ? Colors.white70 : AppColors.gray600))
+                                    : AppColors.danger,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      loading: () => Text('Memuat...', style: TextStyle(color: isDark ? Colors.white70 : AppColors.gray500, fontSize: 12)),
+                      error: (err, stack) => const Text('Gagal memuat status', style: TextStyle(color: AppColors.danger, fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Lakukan check-in setiap 30 hari agar sistem mendeteksi Anda aktif. Jika gagal check-in, protokol warisan darurat akan mulai dijalankan.',
+            style: TextStyle(
+              color: isDark ? Colors.white70 : AppColors.gray600,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : onCheckIn,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Check-in Sekarang',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+            ),
+          ),
         ],
       ),
     );

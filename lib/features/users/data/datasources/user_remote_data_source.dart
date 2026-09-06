@@ -26,6 +26,8 @@ class UserRemoteDataSource extends BaseRemoteDataSource {
   Future<Map<String, dynamic>> updateProfile({
     required String userId,
     String? fullName,
+    String? email,
+    String? phone,
     String? currentPassword,
     String? newPassword,
   }) {
@@ -33,6 +35,8 @@ class UserRemoteDataSource extends BaseRemoteDataSource {
       await _ensureCsrf();
       final body = <String, dynamic>{
         'fullName': ?fullName,
+        'email': ?email,
+        'phone': ?phone,
         'currentPassword': ?currentPassword,
         'newPassword': ?newPassword,
       };

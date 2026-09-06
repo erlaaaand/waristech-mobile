@@ -18,6 +18,8 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   final _currentPasswordCtrl = TextEditingController();
   final _newPasswordCtrl = TextEditingController();
   final _confirmPasswordCtrl = TextEditingController();
@@ -31,11 +33,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.initState();
     final user = ref.read(authProvider).value;
     _nameCtrl.text = user?.name ?? '';
+    _emailCtrl.text = user?.email ?? '';
+    _phoneCtrl.text = user?.phone ?? '';
   }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
     _currentPasswordCtrl.dispose();
     _newPasswordCtrl.dispose();
     _confirmPasswordCtrl.dispose();
@@ -79,6 +85,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         .update(
           userId: userId,
           fullName: _nameCtrl.text.trim(),
+          email: _emailCtrl.text.trim(),
+          phone: _phoneCtrl.text.trim(),
           currentPassword: _changePassword
               ? _currentPasswordCtrl.text
               : null,
@@ -191,6 +199,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   controller: _nameCtrl,
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Nama tidak boleh kosong'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                WtFormField(
+                  label: 'Email',
+                  controller: _emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Email tidak boleh kosong';
+                    if (!RegExp(r'^.+@.+\..+$').hasMatch(v)) return 'Format email tidak valid';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                WtFormField(
+                  label: 'No. HP',
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'No. HP tidak boleh kosong'
                       : null,
                 ),
                 const SizedBox(height: 20),

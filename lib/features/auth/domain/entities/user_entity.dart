@@ -65,6 +65,7 @@ class UserEntity {
   final String id;
   final String name;
   final String email;
+  final String? phone;
   final UserRole role;
   final String? avatarUrl;
 
@@ -72,6 +73,7 @@ class UserEntity {
     required this.id,
     required this.name,
     required this.email,
+    this.phone,
     required this.role,
     this.avatarUrl,
   });
@@ -93,6 +95,7 @@ class UserEntity {
           userData['email']?.toString() ??
           'User',
       email: userData['email']?.toString() ?? '',
+      phone: userData['phone']?.toString(),
       role: UserRole.fromBackendString(userData['role']?.toString()),
       avatarUrl: userData['avatarUrl']?.toString(),
     );
@@ -102,6 +105,7 @@ class UserEntity {
     String? id,
     String? name,
     String? email,
+    String? phone,
     UserRole? role,
     String? avatarUrl,
   }) {
@@ -109,6 +113,7 @@ class UserEntity {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
+      phone: phone ?? this.phone,
       role: role ?? this.role,
       avatarUrl: avatarUrl ?? this.avatarUrl,
     );

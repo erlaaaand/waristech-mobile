@@ -14,6 +14,8 @@ class UpdateProfileNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> update({
     required String userId,
     String? fullName,
+    String? email,
+    String? phone,
     String? currentPassword,
     String? newPassword,
   }) async {
@@ -22,6 +24,8 @@ class UpdateProfileNotifier extends StateNotifier<AsyncValue<void>> {
       () => _ds.updateProfile(
         userId: userId,
         fullName: fullName,
+        email: email,
+        phone: phone,
         currentPassword: currentPassword,
         newPassword: newPassword,
       ),
