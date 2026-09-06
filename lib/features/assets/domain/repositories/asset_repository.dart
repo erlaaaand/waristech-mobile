@@ -13,6 +13,7 @@ abstract class AssetRepository {
     required String assetName,
     required String platform,
     required String accountIdentifier,
+    required String assignedNotarisId,
     required String custodyType,
     Map<String, dynamic>? secret,
   });

@@ -428,13 +428,13 @@ class _WtOtpFieldState extends State<WtOtpField> {
                   borderRadius: BorderRadius.circular(16),
                   borderSide: isDark 
                       ? BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 1)
-                      : BorderSide.none,
+                      : BorderSide(color: Colors.black.withValues(alpha: 0.1), width: 1),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: isDark 
                       ? BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 1)
-                      : BorderSide.none,
+                      : BorderSide(color: Colors.black.withValues(alpha: 0.1), width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),

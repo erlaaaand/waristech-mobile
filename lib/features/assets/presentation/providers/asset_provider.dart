@@ -1,10 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/storage/secure_key_share_storage.dart';
+import 'package:wt_mobile/core/network/dio_client.dart';
 import 'package:wt_mobile/features/assets/data/datasources/asset_remote_data_source.dart';
 import 'package:wt_mobile/features/assets/data/repositories/asset_repository_impl.dart';
 import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
 import 'package:wt_mobile/features/assets/domain/entities/create_asset_result_entity.dart';
 import 'package:wt_mobile/features/assets/domain/repositories/asset_repository.dart';
+
+/// Provider untuk daftar Notaris yang bisa dipilih saat membuat aset
+final notariesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final dio = DioClient().dio;
+  final response = await dio.get<dynamic>('/users/notaries');
+  final data = response.data;
+  return (data as List).cast<Map<String, dynamic>>();
+});
 
 /// Provider untuk [AssetRepository].
 /// Presentation layer menggunakan interface, bukan implementasi.
@@ -40,6 +49,7 @@ class CreateAssetNotifier
     required String assetName,
     required String platform,
     required String accountIdentifier,
+    required String assignedNotarisId,
     required String custodyType,
     Map<String, dynamic>? secret,
   }) async {
@@ -50,6 +60,7 @@ class CreateAssetNotifier
         assetName: assetName,
         platform: platform,
         accountIdentifier: accountIdentifier,
+        assignedNotarisId: assignedNotarisId,
         custodyType: custodyType,
         secret: secret,
       );

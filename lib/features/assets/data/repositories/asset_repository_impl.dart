@@ -35,6 +35,7 @@ class AssetRepositoryImpl implements AssetRepository {
     required String assetName,
     required String platform,
     required String accountIdentifier,
+    required String assignedNotarisId,
     required String custodyType,
     Map<String, dynamic>? secret,
   }) async {
@@ -43,6 +44,7 @@ class AssetRepositoryImpl implements AssetRepository {
       assetName: assetName,
       platform: platform,
       accountIdentifier: accountIdentifier,
+      assignedNotarisId: assignedNotarisId,
       custodyType: custodyType,
       secret: secret,
     );

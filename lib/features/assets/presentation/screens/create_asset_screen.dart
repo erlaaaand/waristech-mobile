@@ -30,6 +30,7 @@ class _CreateAssetScreenState extends ConsumerState<CreateAssetScreen> {
 
   AssetType _type = AssetType.crypto;
   AssetCustodyType _custodyType = AssetCustodyType.vault;
+  String? _selectedNotarisId;
 
   @override
   void dispose() {
@@ -50,6 +51,10 @@ class _CreateAssetScreenState extends ConsumerState<CreateAssetScreen> {
 
   Future<void> _submit() async {
     if (_formKey.currentState?.validate() != true) return;
+    if (_selectedNotarisId == null) {
+      WtSnackbar.error(context, 'Wajib memilih Notaris pemeriksa');
+      return;
+    }
 
     final notifier = ref.read(createAssetProvider.notifier);
     await notifier.create(
@@ -57,6 +62,7 @@ class _CreateAssetScreenState extends ConsumerState<CreateAssetScreen> {
       assetName: _assetNameCtrl.text.trim(),
       platform: _platformCtrl.text.trim(),
       accountIdentifier: _accountIdentifierCtrl.text.trim(),
+      assignedNotarisId: _selectedNotarisId!,
       custodyType: _custodyType == AssetCustodyType.vault
           ? 'VAULT'
           : 'GUIDANCE',
@@ -142,6 +148,11 @@ class _CreateAssetScreenState extends ConsumerState<CreateAssetScreen> {
                   controller: _accountIdentifierCtrl,
                   hintText: 'Username / email / no. rekening',
                   validator: _requiredValidator,
+                ),
+                const SizedBox(height: 16),
+                _NotarisSelector(
+                  value: _selectedNotarisId,
+                  onChanged: (val) => setState(() => _selectedNotarisId = val),
                 ),
                 const SizedBox(height: 24),
                 _CustodySelector(
@@ -361,6 +372,45 @@ class _CustodyOption extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Widget dropdown untuk memilih Notaris dari provider `notariesProvider`
+class _NotarisSelector extends ConsumerWidget {
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  const _NotarisSelector({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncNotaries = ref.watch(notariesProvider);
+
+    return asyncNotaries.when(
+      data: (notaries) {
+        return DropdownButtonFormField<String>(
+          initialValue: value,
+          decoration: InputDecoration(
+            labelText: 'Notaris Pemeriksa',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+            filled: true,
+          ),
+          items: notaries.map((n) {
+            return DropdownMenuItem<String>(
+              value: n['id'] as String,
+              child: Text(n['fullName'] as String),
+            );
+          }).toList(),
+          onChanged: onChanged,
+          validator: (v) => v == null ? 'Wajib memilih Notaris' : null,
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, st) => Text(
+        'Gagal memuat daftar notaris: $e',
+        style: const TextStyle(color: Colors.red),
       ),
     );
   }
