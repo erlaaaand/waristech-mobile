@@ -8,7 +8,7 @@ class WtLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset('assets/logo.svg', width: size, height: size);
+    return SvgPicture.asset('assets/logo.svg', height: size);
   }
 }
 
