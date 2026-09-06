@@ -194,7 +194,7 @@ class _ForgotPasswordLink extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () => context.pushNamed('forgot-password'),
+        onPressed: () => context.push('/forgot-password'),
         child: Text(
           'Lupa Kata Sandi?',
           style: TextStyle(
@@ -225,12 +225,7 @@ class _RegisterLink extends StatelessWidget {
           ),
         ),
         TextButton(
-          // Ahli Waris TIDAK didaftarkan lewat sini — satu-satunya jalan
-          // masuk resmi adalah link undangan yang dibuat Pewaris (lihat
-          // `invitations_screen.dart` & `register_ahli_waris_screen.dart`).
-          // Mendaftar tanpa kode dari link sudah pasti gagal di backend,
-          // jadi tidak ditawarkan sebagai pilihan generik di sini.
-          onPressed: () => context.pushNamed('register-pewaris'),
+          onPressed: () => context.push('/register/pewaris'),
           child: Text(
             'Daftar Sekarang',
             style: TextStyle(
