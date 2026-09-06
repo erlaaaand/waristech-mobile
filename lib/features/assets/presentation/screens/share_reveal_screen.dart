@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:wt_mobile/core/crypto/rsa_keypair_service.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/utils/clipboard_utils.dart';
 import 'package:wt_mobile/features/assets/domain/entities/create_asset_result_entity.dart';
-import 'package:wt_mobile/features/assets/presentation/providers/asset_provider.dart';
 import 'package:wt_mobile/features/assets/presentation/screens/share_reveal_widgets.dart';
-import 'package:wt_mobile/features/users/presentation/providers/user_provider.dart';
 
 /// Menampilkan bagian kunci Eksekutor & Notaris SATU KALI setelah aset VAULT
 /// dibuat. Server tidak pernah menyimpan atau mengirim ulang nilai ini.
@@ -28,61 +25,9 @@ class ShareRevealScreen extends ConsumerStatefulWidget {
 }
 
 class _ShareRevealScreenState extends ConsumerState<ShareRevealScreen> {
-  bool _confirmed = false;
-  final _notarisIdCtrl = TextEditingController();
-  bool _isEscrowing = false;
-  String? _escrowError;
-  bool _escrowDone = false;
-
   @override
   void dispose() {
-    _notarisIdCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _escrowToNotaris() async {
-    final notarisId = _notarisIdCtrl.text.trim();
-    final notarisShare = widget.result.notarisShare;
-    if (notarisId.isEmpty) {
-      setState(() => _escrowError = 'ID Notaris wajib diisi.');
-      return;
-    }
-    if (notarisShare == null || notarisShare.isEmpty) {
-      setState(() => _escrowError = 'Bagian kunci Notaris tidak tersedia.');
-      return;
-    }
-    setState(() {
-      _isEscrowing = true;
-      _escrowError = null;
-    });
-    try {
-      final keyInfo = await fetchNotarisPublicKey(notarisId);
-      final publicKeyPem = keyInfo['publicKey'] as String? ?? '';
-      if (publicKeyPem.isEmpty) {
-        throw Exception('Notaris ini belum mendaftarkan kunci publik.');
-      }
-      final encryptedShare = RsaKeypairService.encryptWithPublicKeyPem(
-        notarisShare,
-        publicKeyPem,
-      );
-      await ref
-          .read(assetRepositoryProvider)
-          .escrowNotarisShare(
-            assetId: widget.result.asset.id,
-            notarisId: notarisId,
-            encryptedShare: encryptedShare,
-          );
-      if (!mounted) return;
-      setState(() {
-        _isEscrowing = false;
-        _escrowDone = true;
-      });
-    } catch (e) {
-      setState(() {
-        _isEscrowing = false;
-        _escrowError = e.toString();
-      });
-    }
   }
 
   void _finish() {

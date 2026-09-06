@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/theme/theme_provider.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
-import 'package:wt_mobile/features/compliance/presentation/screens/consent_status_screen.dart';
 import 'package:wt_mobile/features/inheritance/presentation/screens/invitations_screen.dart';
 import 'package:wt_mobile/features/users/presentation/screens/edit_profile_screen.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/profil_components.dart';
 
 class PewarisProfilView extends ConsumerWidget {
-  final VoidCallback onOpenHeirs;
   final VoidCallback onOpenProtocol;
 
   const PewarisProfilView({
     super.key,
-    required this.onOpenHeirs,
     required this.onOpenProtocol,
   });
 
@@ -35,13 +32,8 @@ class PewarisProfilView extends ConsumerWidget {
           SettingsGroup(
             children: [
               SettingsRow(
-                icon: Icons.gavel_outlined,
-                label: 'Skema Hukum Waris',
-                onTap: onOpenHeirs,
-              ),
-              SettingsRow(
                 icon: Icons.verified_user_outlined,
-                label: 'Protokol Darurat',
+                label: 'Kontak Darurat',
                 onTap: onOpenProtocol,
               ),
               SettingsRow(
@@ -67,15 +59,6 @@ class PewarisProfilView extends ConsumerWidget {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const EditProfileScreen(),
-                  ),
-                ),
-              ),
-              SettingsRow(
-                icon: Icons.privacy_tip_outlined,
-                label: 'Persetujuan Data Pribadi',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ConsentStatusScreen(),
                   ),
                 ),
                 isLast: true,

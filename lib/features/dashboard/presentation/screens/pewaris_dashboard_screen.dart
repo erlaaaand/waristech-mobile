@@ -4,9 +4,8 @@ import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/aset_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/home_view.dart';
-import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/hukum_waris_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/profil_view.dart';
-import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/protokol_view.dart';
+import 'package:wt_mobile/features/inheritance/presentation/screens/invitations_screen.dart';
 
 /// Shell screen untuk role Pewaris.
 ///
@@ -75,10 +74,9 @@ class _PewarisDashboardScreenState
             PewarisHomeView(
               onOpenAssets: () => _navigate(0),
               onOpenProfile: () => _navigate(2),
-              onOpenHeirs: () => _openPage(const PewarisHukumWarisPage()),
+              onOpenHeirs: () => _openPage(const InvitationsScreen()),
             ),
             PewarisProfilView(
-              onOpenHeirs: () => _openPage(const PewarisHukumWarisPage()),
               onOpenProtocol: () => _openPage(const PewarisProtokolPage()),
             ),
           ],
@@ -93,51 +91,21 @@ class _PewarisDashboardScreenState
   }
 }
 
-/// Pembungkus halaman (bukan tab) untuk modul Skema Waris.
-class PewarisHukumWarisPage extends StatelessWidget {
-  const PewarisHukumWarisPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: _BackOnlyAppBar(),
-      body: PewarisHukumWarisView(),
-    );
-  }
-}
-
-/// Pembungkus halaman (bukan tab) untuk modul Protokol Darurat.
+/// Pembungkus halaman (bukan tab) untuk Protokol Darurat.
 class PewarisProtokolPage extends StatelessWidget {
   const PewarisProtokolPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: _BackOnlyAppBar(),
-      body: PewarisProtokolView(),
-    );
-  }
-}
-
-/// AppBar minimalis: hanya tombol kembali, tanpa judul — judul besar sudah
-/// dirender oleh view-nya sendiri (mengikuti gaya prototipe yang menaruh
-/// judul di dalam konten, bukan di bar).
-class _BackOnlyAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _BackOnlyAppBar();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => Navigator.of(context).pop(),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Kontak Darurat')),
+      body: const Center(
+        child: Text(
+          'Konfigurasi Kontak Darurat\n(Segera Hadir)',
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
 }
+
