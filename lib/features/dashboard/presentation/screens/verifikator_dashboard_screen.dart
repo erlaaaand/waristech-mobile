@@ -6,6 +6,7 @@ import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:wt_mobile/features/compliance/presentation/screens/consent_status_screen.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
+import 'package:wt_mobile/features/verification/presentation/providers/verification_provider.dart';
 import 'package:wt_mobile/features/users/presentation/screens/edit_profile_screen.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/verifikator/antrean_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/verifikator/pencairan_view.dart';
@@ -50,11 +51,15 @@ class _VerifikatorDashboardScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // Badge titik hijau di tab Antrean dulu SELALU tampil (showBadge: true
     // hardcode) walau antreannya kosong — sekarang dihitung dari data asli
-    // (aset + relasi Non-Nasab pending) yang sama-sama ditampilkan di tab itu.
+    // (aset + relasi Non-Nasab + akta kematian pending) yang sama-sama
+    // ditampilkan di tab itu.
     final pendingAssets = ref.watch(pendingAssetsNotarisProvider).valueOrNull;
     final pendingFamily = ref.watch(pendingFamilyMembersProvider).valueOrNull;
-    final pendingCount =
-        (pendingAssets?.length ?? 0) + (pendingFamily?.length ?? 0);
+    final pendingDeathCerts =
+        ref.watch(pendingDeathCertificatesProvider).valueOrNull;
+    final pendingCount = (pendingAssets?.length ?? 0) +
+        (pendingFamily?.length ?? 0) +
+        (pendingDeathCerts?.length ?? 0);
 
     return Scaffold(
       extendBody: true,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
+import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
+import 'package:wt_mobile/features/assets/presentation/providers/asset_provider.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/ahli_waris_lacak_components.dart';
 
@@ -11,7 +13,23 @@ class AhliWarisLacakView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final membershipAsync = ref.watch(myFamilyMembershipProvider);
+    final allocatedAssetsAsync = ref.watch(allocatedAssetsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Belum ada endpoint yang mengekspos status verifikasi akta kematian /
+    // saksi ke Ahli Waris (hanya Notaris) — jadi tahap 2 & 3 tidak bisa
+    // diturunkan langsung dari sumber aslinya. Tahap 4 (pelepasan kunci)
+    // BISA: kalau ada aset teralokasi yang sudah distributed/closed, itu
+    // bukti nyata seluruh rantai verifikasi (termasuk tahap 2 & 3) sudah
+    // selesai — dipakai untuk menaikkan status tahap-tahap sebelumnya juga.
+    final keyReleaseDone = allocatedAssetsAsync.maybeWhen(
+      data: (assets) => assets.any(
+        (a) =>
+            a.status == AssetStatus.distributed ||
+            a.status == AssetStatus.closed,
+      ),
+      orElse: () => false,
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
@@ -55,11 +73,13 @@ class AhliWarisLacakView extends ConsumerWidget {
                       children: [
                         for (
                           int i = 0;
-                          i < _steps(pewarisName).length;
+                          i < _steps(pewarisName, keyReleaseDone).length;
                           i++
                         ) ...[
                           if (i > 0) const SizedBox(height: 24),
-                          LegalTimelineItem(step: _steps(pewarisName)[i]),
+                          LegalTimelineItem(
+                            step: _steps(pewarisName, keyReleaseDone)[i],
+                          ),
                         ],
                       ],
                     ),
@@ -73,7 +93,7 @@ class AhliWarisLacakView extends ConsumerWidget {
     );
   }
 
-  List<TimelineStep> _steps(String? pewarisName) => [
+  List<TimelineStep> _steps(String? pewarisName, bool keyReleaseDone) => [
     TimelineStep(
       title: 'Pewaris Terdaftar',
       desc: pewarisName != null
@@ -81,19 +101,22 @@ class AhliWarisLacakView extends ConsumerWidget {
           : 'Sistem memonitor status Proof-of-Life Pewaris Anda.',
       isDone: true,
     ),
-    const TimelineStep(
+    TimelineStep(
       title: 'Akta Kematian',
       desc: 'Ajukan dokumen akta kematian resmi Dukcapil dari tab Lapor Kematian.',
-      isCurrent: true,
+      isDone: keyReleaseDone,
+      isCurrent: !keyReleaseDone,
     ),
-    const TimelineStep(
+    TimelineStep(
       title: 'Validasi Notaris & Saksi',
       desc:
           'Notaris memverifikasi dokumen; minimal 3 Saksi memberi persetujuan.',
+      isDone: keyReleaseDone,
     ),
-    const TimelineStep(
+    TimelineStep(
       title: 'Pelepasan Kunci Brankas',
       desc: "Pecahan kunci Shamir's Secret Sharing dibagikan ke Eksekutor.",
+      isDone: keyReleaseDone,
     ),
   ];
 }

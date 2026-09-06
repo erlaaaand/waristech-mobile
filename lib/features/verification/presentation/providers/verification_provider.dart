@@ -48,7 +48,8 @@ class VerificationActionNotifier
 
   Future<void> verify(String assetId) => _act(() => _ds.verifyAsset(assetId));
 
-  Future<void> reject(String assetId) => _act(() => _ds.rejectAsset(assetId));
+  Future<void> reject(String assetId, String reason) =>
+      _act(() => _ds.rejectAsset(assetId, reason));
 
   Future<void> _act(Future<dynamic> Function() action) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -67,21 +68,33 @@ final verificationActionProvider = StateNotifierProvider.family
       (ref, id) => VerificationActionNotifier(),
     );
 
+/// Antrean dokumen akta kematian yang menunggu verifikasi Notaris —
+/// GET /inheritance/death-certificate/notaris/pending.
+final pendingDeathCertificatesProvider =
+    FutureProvider.autoDispose<List<dynamic>>((ref) {
+      return _ds.fetchPendingDeathCertificates();
+    });
+
 /// Verifikasi dokumen akta kematian (Notaris) — syarat pihak resmi/netral
 /// sebelum brankas dapat dibuka (lihat modul Verifikasi Berjenjang backend).
+/// Provider family — satu notifier per deathVerificationId, supaya beberapa
+/// item di antrean tidak berbagi satu state loading/error yang sama.
 class VerifyDeathCertificateNotifier extends StateNotifier<AsyncValue<void>> {
-  VerifyDeathCertificateNotifier() : super(const AsyncValue.data(null));
+  final Ref _ref;
+  VerifyDeathCertificateNotifier(this._ref) : super(const AsyncValue.data(null));
 
   Future<void> verify(String deathVerificationId) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () => _ds.verifyDeathCertificate(deathVerificationId),
     );
+    if (!state.hasError) {
+      _ref.invalidate(pendingDeathCertificatesProvider);
+    }
   }
 }
 
-final verifyDeathCertificateProvider =
-    StateNotifierProvider.autoDispose<
-      VerifyDeathCertificateNotifier,
-      AsyncValue<void>
-    >((ref) => VerifyDeathCertificateNotifier());
+final verifyDeathCertificateProvider = StateNotifierProvider.family
+    .autoDispose<VerifyDeathCertificateNotifier, AsyncValue<void>, String>(
+      (ref, id) => VerifyDeathCertificateNotifier(ref),
+    );

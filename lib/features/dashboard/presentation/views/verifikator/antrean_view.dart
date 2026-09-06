@@ -6,18 +6,11 @@ import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:wt_mobile/features/verification/data/datasources/verification_remote_data_source.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
+import 'package:wt_mobile/features/verification/presentation/providers/verification_provider.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/asset_verification_card.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/death_certificate_verification_card.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/family_member_review_card.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/verifikator_header.dart';
-
-// ---------------------------------------------------------------------------
-// Verifikasi Akta Kematian
-// ---------------------------------------------------------------------------
-//
-// CATATAN: backend belum menyediakan endpoint daftar dokumen akta kematian
-// yang menunggu tinjauan — ID diperoleh manual (mis. dari keluarga Pewaris)
-// sampai endpoint listing tersebut dibangun.
 
 // ---------------------------------------------------------------------------
 // Provider: fetch pending assets dari backend
@@ -59,7 +52,12 @@ class VerifikatorAntreanView extends ConsumerWidget {
         children: [
           VerifikatorHeader(userName: userName),
           const SizedBox(height: 24),
-          const DeathCertificateVerificationCard(),
+          const Text(
+            'Akta Kematian',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          const _PendingDeathCertificatesSection(),
           const SizedBox(height: 24),
           const Text(
             'Relasi Keluarga Non-Nasab',
@@ -151,6 +149,45 @@ class VerifikatorAntreanView extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Antrean dokumen akta kematian yang menunggu verifikasi Notaris —
+/// GET /inheritance/death-certificate/notaris/pending.
+class _PendingDeathCertificatesSection extends ConsumerWidget {
+  const _PendingDeathCertificatesSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pendingAsync = ref.watch(pendingDeathCertificatesProvider);
+
+    return pendingAsync.when(
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (e, _) => WtErrorBanner(message: e.toString()),
+      data: (items) => items.isEmpty
+          ? const WtEmptyState(
+              message: 'Tidak ada akta kematian yang menunggu.',
+              icon: Icons.task_alt,
+              iconColor: AppColors.success,
+              iconSize: 40,
+            )
+          : Column(
+              children: items
+                  .whereType<Map<String, dynamic>>()
+                  .map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: DeathCertificateReviewCard(item: item),
+                    ),
+                  )
+                  .toList(),
+            ),
     );
   }
 }

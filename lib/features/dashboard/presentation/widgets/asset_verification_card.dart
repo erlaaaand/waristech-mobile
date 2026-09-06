@@ -153,17 +153,41 @@ class AssetVerificationCard extends ConsumerWidget {
   }
 
   Future<void> _showRejectDialog(BuildContext context, WidgetRef ref) async {
-    final confirmed = await WtConfirmDialog.show(
-      context,
-      title: 'Tolak Verifikasi',
-      message: 'Apakah Anda yakin ingin menolak aset ini?\nPewaris akan mendapat notifikasi.',
-      confirmLabel: 'Ya, Tolak',
-      confirmColor: AppColors.danger,
+    final reasonCtrl = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Tolak Verifikasi Aset'),
+        content: TextField(
+          controller: reasonCtrl,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Alasan penolakan (wajib diisi)...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, reasonCtrl.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Tolak'),
+          ),
+        ],
+      ),
     );
 
-    if (confirmed && context.mounted) {
-      ref.read(verificationActionProvider(asset.id).notifier).reject(asset.id);
-    }
+    if (reason == null || reason.isEmpty) return;
+    if (!context.mounted) return;
+    ref
+        .read(verificationActionProvider(asset.id).notifier)
+        .reject(asset.id, reason);
   }
 }
 

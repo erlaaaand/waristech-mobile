@@ -4,7 +4,9 @@ import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/aset_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/home_view.dart';
+import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/hukum_waris_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/profil_view.dart';
+import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/protokol_view.dart';
 import 'package:wt_mobile/features/inheritance/presentation/screens/invitations_screen.dart';
 
 /// Shell screen untuk role Pewaris.
@@ -75,9 +77,12 @@ class _PewarisDashboardScreenState
               onOpenAssets: () => _navigate(0),
               onOpenProfile: () => _navigate(2),
               onOpenHeirs: () => _openPage(const InvitationsScreen()),
+              onOpenProtocol: () => _openPage(const PewarisProtokolPage()),
+              onOpenHukumWaris: () => _openPage(const PewarisHukumWarisPage()),
             ),
             PewarisProfilView(
               onOpenProtocol: () => _openPage(const PewarisProtokolPage()),
+              onOpenHukumWaris: () => _openPage(const PewarisHukumWarisPage()),
             ),
           ],
         ),
@@ -99,12 +104,20 @@ class PewarisProtokolPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Kontak Darurat')),
-      body: const Center(
-        child: Text(
-          'Konfigurasi Kontak Darurat\n(Segera Hadir)',
-          textAlign: TextAlign.center,
-        ),
-      ),
+      body: const PewarisProtokolView(),
+    );
+  }
+}
+
+/// Pembungkus halaman (bukan tab) untuk Skema Waris.
+class PewarisHukumWarisPage extends StatelessWidget {
+  const PewarisHukumWarisPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Skema Waris')),
+      body: const PewarisHukumWarisView(),
     );
   }
 }

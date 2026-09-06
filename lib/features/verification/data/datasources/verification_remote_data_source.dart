@@ -30,11 +30,14 @@ class VerificationRemoteDataSource extends BaseRemoteDataSource {
     });
   }
 
-  /// Tolak verifikasi aset (Notaris).
+  /// Tolak verifikasi aset (Notaris). `reason` wajib diisi backend.
   /// Backend: PATCH /assets/:id/reject
-  Future<Map<String, dynamic>> rejectAsset(String assetId) {
+  Future<Map<String, dynamic>> rejectAsset(String assetId, String reason) {
     return safeCall(() async {
-      final response = await dio.patch<dynamic>('/assets/$assetId/reject');
+      final response = await dio.patch<dynamic>(
+        '/assets/$assetId/reject',
+        data: {'reason': reason},
+      );
       return response.data as Map<String, dynamic>? ?? {};
     });
   }
@@ -47,12 +50,20 @@ class VerificationRemoteDataSource extends BaseRemoteDataSource {
     });
   }
 
+  /// Ambil daftar dokumen akta kematian yang menunggu verifikasi Notaris.
+  /// Backend: GET /inheritance/death-certificate/notaris/pending
+  Future<List<dynamic>> fetchPendingDeathCertificates() {
+    return safeCall(() async {
+      final response = await dio.get<dynamic>(
+        '/inheritance/death-certificate/notaris/pending',
+      );
+      final unwrapped = unwrapData(response.data);
+      return unwrapped is List ? unwrapped : [];
+    });
+  }
+
   /// Verifikasi dokumen akta kematian (Notaris).
   /// Backend: PATCH /inheritance/death-certificate/:id/verify
-  ///
-  /// CATATAN: backend belum menyediakan endpoint daftar dokumen yang
-  /// menunggu tinjauan — id diperoleh manual (mis. dari Pewaris/keluarga)
-  /// sampai endpoint listing tersebut dibangun.
   Future<void> verifyDeathCertificate(String deathVerificationId) {
     return safeCall(() async {
       await _ensureCsrf();

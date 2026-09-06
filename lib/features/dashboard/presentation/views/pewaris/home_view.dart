@@ -11,12 +11,16 @@ class PewarisHomeView extends ConsumerWidget {
   final VoidCallback onOpenAssets;
   final VoidCallback onOpenProfile;
   final VoidCallback onOpenHeirs;
+  final VoidCallback onOpenProtocol;
+  final VoidCallback onOpenHukumWaris;
 
   const PewarisHomeView({
     super.key,
     required this.onOpenAssets,
     required this.onOpenProfile,
     required this.onOpenHeirs,
+    required this.onOpenProtocol,
+    required this.onOpenHukumWaris,
   });
 
   @override
@@ -155,6 +159,8 @@ class PewarisHomeView extends ConsumerWidget {
                     QuickActionsRow(
                       onOpenAssets: onOpenAssets,
                       onOpenHeirs: onOpenHeirs,
+                      onOpenProtocol: onOpenProtocol,
+                      onOpenProfile: onOpenProfile,
                     ),
 
                     const SizedBox(height: 24),
@@ -174,6 +180,11 @@ class PewarisHomeView extends ConsumerWidget {
 
                     // 5. Ahli Waris (Quick Send Replacement)
                     AhliWarisSection(onOpenHeirs: onOpenHeirs),
+
+                    const SizedBox(height: 32),
+
+                    // 6. Skema Waris (ringkasan, tautan ke halaman penuh)
+                    SkemaWarisSummarySection(onOpenHukumWaris: onOpenHukumWaris),
                   ],
                 ),
               ),
