@@ -247,9 +247,9 @@ class _AssetTypeDropdown extends StatelessWidget {
       value: value,
       items: AssetType.values
           .map(
-            (t) => DropdownMenuItem<AssetType>(
+            (t) => WtDropdownItem<AssetType>(
               value: t,
-              child: Text(t.displayName),
+              label: t.displayName,
             ),
           )
           .toList(),
@@ -390,9 +390,9 @@ class _NotarisSelector extends ConsumerWidget {
           label: 'Notaris Pemeriksa',
           value: value,
           items: notaries.map((n) {
-            return DropdownMenuItem<String>(
+            return WtDropdownItem<String>(
               value: n['id'] as String,
-              child: Text(n['fullName'] as String),
+              label: n['fullName'] as String,
             );
           }).toList(),
           onChanged: onChanged,

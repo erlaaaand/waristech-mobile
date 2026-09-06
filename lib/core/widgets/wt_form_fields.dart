@@ -295,13 +295,23 @@ class WtConsentCheckbox extends StatelessWidget {
   }
 }
 
-/// Dropdown field dengan gaya yang persis sama dengan [WtFormField]
+/// Item untuk [WtDropdownField]
+class WtDropdownItem<T> {
+  final T value;
+  final String label;
+
+  const WtDropdownItem({required this.value, required this.label});
+}
+
+/// Dropdown field kustom yang persis sama dengan [WtFormField] namun 
+/// memunculkan bottom sheet modern dan premium alih-alih native menu.
 class WtDropdownField<T> extends StatelessWidget {
   final String label;
   final T? value;
-  final List<DropdownMenuItem<T>> items;
+  final List<WtDropdownItem<T>> items;
   final ValueChanged<T?> onChanged;
   final String? Function(T?)? validator;
+  final String hintText;
 
   const WtDropdownField({
     super.key,
@@ -310,11 +320,107 @@ class WtDropdownField<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.validator,
+    this.hintText = 'Pilih salah satu...',
   });
+
+  void _showBottomSheet(BuildContext context, bool isDark) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext ctx) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  itemBuilder: (ctx, i) {
+                    final item = items[i];
+                    final isSelected = item.value == value;
+                    return InkWell(
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        onChanged(item.value);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.label,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : (isDark
+                                          ? Colors.white
+                                          : AppColors.navy),
+                                ),
+                              ),
+                            ),
+                            if (isSelected)
+                              const Icon(
+                                Icons.check_circle,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedItem = items.where((e) => e.value == value).firstOrNull;
+    final displayLabel = selectedItem?.label ?? hintText;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,52 +437,73 @@ class WtDropdownField<T> extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<T>(
-          value: value,
-          items: items,
-          onChanged: onChanged,
+        FormField<T>(
+          initialValue: value,
           validator: validator,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: isDark ? Colors.white70 : AppColors.gray500,
-          ),
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: isDark ? Colors.white : AppColors.navy,
-          ),
-          dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            filled: true,
-            fillColor: isDark
-                ? AppColors.navy.withValues(alpha: 0.2)
-                : AppColors.warm,
-            border: OutlineInputBorder(
+          builder: (FormFieldState<T> state) {
+            final hasError = state.hasError;
+            return InkWell(
+              onTap: () => _showBottomSheet(context, isDark),
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: (isDark ? Colors.white : AppColors.navy).withValues(
-                  alpha: 0.1,
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  errorText: state.errorText,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  filled: true,
+                  fillColor: isDark
+                      ? AppColors.navy.withValues(alpha: 0.2)
+                      : AppColors.warm,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: (isDark ? Colors.white : AppColors.navy).withValues(
+                        alpha: 0.1,
+                      ),
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: (isDark ? Colors.white : AppColors.navy).withValues(
+                        alpha: 0.1,
+                      ),
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayLabel,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: selectedItem == null
+                              ? (isDark ? Colors.white38 : Colors.black38)
+                              : (isDark ? Colors.white : AppColors.navy),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: isDark ? Colors.white70 : AppColors.gray500,
+                    ),
+                  ],
                 ),
               ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: (isDark ? Colors.white : AppColors.navy).withValues(
-                  alpha: 0.1,
-                ),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-          ),
+            );
+          },
         ),
       ],
     );
