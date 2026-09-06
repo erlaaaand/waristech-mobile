@@ -48,10 +48,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // sebagai rute yang harus "dibuang" begitu login seperti authOnlyPublicRoutes.
       const guestFlowRoutes = {'/verifikasi/saksi'};
 
-      final isAuthOnlyPublic = authOnlyPublicRoutes.contains(
-        state.matchedLocation,
-      );
-      final isGuestFlow = guestFlowRoutes.contains(state.matchedLocation);
+      final path = state.uri.path;
+      final isAuthOnlyPublic = authOnlyPublicRoutes.contains(path);
+      final isGuestFlow = guestFlowRoutes.contains(path);
 
       // Belum login dan bukan di rute publik (auth ATAU guest) -> ke login
       if (user == null && !isAuthOnlyPublic && !isGuestFlow) return '/login';
