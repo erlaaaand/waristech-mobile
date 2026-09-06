@@ -299,6 +299,13 @@ class ProofOfLifeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final status = statusState.valueOrNull;
+    final now = DateTime.now();
+    final hasCheckedInToday = status != null &&
+        status.lastCheckInAt.toLocal().year == now.year &&
+        status.lastCheckInAt.toLocal().month == now.month &&
+        status.lastCheckInAt.toLocal().day == now.day;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(20),
@@ -349,7 +356,7 @@ class ProofOfLifeCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     statusState.when(
                       data: (status) {
-                        final date = status.lastCheckInAt;
+                        final date = status.lastCheckInAt.toLocal();
                         final daysLeft = status.daysUntilDue;
                         final isWarning = daysLeft <= 7;
 
@@ -357,7 +364,7 @@ class ProofOfLifeCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Terakhir: ${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
+                              'Terakhir: ${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
                               style: const TextStyle(
                                 color: AppColors.success,
                                 fontSize: 12,
@@ -401,10 +408,12 @@ class ProofOfLifeCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: isLoading ? null : onCheckIn,
+              onPressed: isLoading || hasCheckedInToday ? null : onCheckIn,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
+                disabledBackgroundColor: isDark ? AppColors.gray800 : AppColors.gray200,
+                disabledForegroundColor: isDark ? Colors.white54 : AppColors.gray500,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -420,9 +429,9 @@ class ProofOfLifeCard extends StatelessWidget {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text(
-                      'Check-in Sekarang',
-                      style: TextStyle(
+                  : Text(
+                      hasCheckedInToday ? 'Sudah Check-in Hari Ini' : 'Check-in Sekarang',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
