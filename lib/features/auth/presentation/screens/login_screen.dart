@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
+import 'package:wt_mobile/core/theme/theme_provider.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/auth/domain/entities/user_entity.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
@@ -126,26 +127,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 /// Blok identitas di atas form: wordmark kecil + headline besar rata-kiri +
 /// subjudul — gaya tipografi mengikuti referensi (bukan lagi kartu logo
 /// tersentris).
-class _LoginBranding extends StatelessWidget {
+class _LoginBranding extends ConsumerWidget {
   const _LoginBranding();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            WtLogo(size: 26),
-            SizedBox(width: 8),
-            Text(
-              'WarisTech',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
-              ),
+            const Row(
+              children: [
+                WtLogo(size: 26),
+                SizedBox(width: 8),
+                Text(
+                  'WarisTech',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ],
+            ),
+            IconButton(
+              icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+              onPressed: () => ref.read(themeProvider.notifier).toggle(context),
             ),
           ],
         ),

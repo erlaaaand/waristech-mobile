@@ -33,23 +33,6 @@ class WarisTechApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       routerConfig: router,
-      builder: (context, child) {
-        // Membatasi grid aplikasi agar tidak "mentok menuhin layar"
-        // pada device besar (tablet/web) dengan membungkusnya di maxWidth 480px.
-        return Container(
-          color: Theme.of(context).brightness == Brightness.dark 
-              ? Colors.black 
-              : const Color(0xFFF3F4F6), // Warna latar luar (letterbox)
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: ClipRect(
-                child: child,
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

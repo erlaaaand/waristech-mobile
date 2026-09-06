@@ -6,22 +6,6 @@ import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 
 const _kAccentGlow = Color(0xFF38BDF8);
 
-/// Splash Flutter-side, tampil selama sesi login diperiksa (`authProvider`
-/// loading) — durasinya TIDAK tetap, bisa hanya sepersekian detik di
-/// perangkat cepat atau lebih lama di jaringan lambat. Warna latar SENGAJA
-/// disamakan persis dengan `flutter_native_splash.yaml` (`#000000` di kedua
-/// tema) agar transisi dari splash native (dirender OS sebelum Flutter
-/// boot) ke sini terasa mulus tanpa "kedipan" warna.
-///
-/// Animasi dipecah jadi 2 ticker supaya tetap ringan:
-/// - [_entrance]: one-shot (~1.6s) — logo, wordmark per-huruf, tagline, dan
-///   indikator muat masuk berurutan (staggered), lalu BERHENTI total (tidak
-///   ada Ticker yang jalan lagi setelahnya).
-/// - [_loop]: repeating, HANYA menggerakkan elemen dekoratif murah (titik
-///   mengorbit + arc pemuat berputar + kedipan glow lembut lewat `sin`) —
-///   murni `CustomPainter`/compositing opacity, tanpa gambar/Lottie, supaya
-///   splash tetap terasa hidup kalau pemeriksaan sesi lebih lama tanpa
-///   membebani device.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -56,9 +40,6 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  /// Memetakan [_entrance.value] ke progres 0..1 lokal untuk satu segmen
-  /// timeline (mis. 0.0–0.55 untuk logo) — dasar dari seluruh staggering
-  /// tanpa perlu banyak `AnimationController`/`CurvedAnimation` terpisah.
   double _seg(double begin, double end, [Curve curve = Curves.easeOut]) {
     if (end <= begin) return _entrance.value >= begin ? 1.0 : 0.0;
     final t = ((_entrance.value - begin) / (end - begin)).clamp(0.0, 1.0);
@@ -68,10 +49,12 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // Prototipe & flutter_native_splash.yaml sama-sama #000000 di kedua
-    // tema — dipertahankan lewat token semantik (bukan Colors.black
-    // langsung) supaya niat "ikut tema" tetap terbaca di kode.
-    final background = isDark ? AppColors.darkBackground : AppColors.navy;
+    
+    // Tema dinamis untuk Splash Screen
+    final background = isDark ? AppColors.darkBackground : AppColors.gray50;
+    final textColor = isDark ? Colors.white : AppColors.navy;
+    final iconBgColor = isDark ? Colors.white : AppColors.navy;
+    final arcColor = isDark ? Colors.white : AppColors.navy;
 
     return Scaffold(
       backgroundColor: background,
@@ -99,6 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
                             size: const Size(200, 200),
                             painter: _OrbitPainter(
                               angle: _loop.value * 2 * math.pi,
+                              ringColor: iconBgColor,
                             ),
                           ),
                         ),
@@ -107,15 +91,12 @@ class _SplashScreenState extends State<SplashScreen>
                       Transform.scale(
                         scale: 0.6 + 0.4 * logoT,
                         child: Opacity(
-                          // `easeOutBack` sengaja overshoot >1.0 untuk efek
-                          // pantulan pada scale — TIDAK valid dipakai
-                          // langsung sebagai opacity, jadi di-clamp di sini.
                           opacity: logoT.clamp(0.0, 1.0),
                           child: Container(
                             width: 96,
                             height: 96,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.06),
+                              color: iconBgColor.withValues(alpha: 0.06),
                               borderRadius: BorderRadius.circular(28),
                             ),
                             child: const Center(child: WtLogo(size: 52)),
@@ -135,6 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
                 value: _entrance.value,
                 begin: 0.35,
                 end: 0.65,
+                color: textColor,
               ),
             ),
             const SizedBox(height: 8),
@@ -150,7 +132,7 @@ class _SplashScreenState extends State<SplashScreen>
                       'Warisan Digital yang Amanah',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: textColor.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -165,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
                 final loadingT = _seg(0.8, 1.0);
                 return Opacity(
                   opacity: loadingT,
-                  child: _SpinningArc(loop: _loop),
+                  child: _SpinningArc(loop: _loop, color: arcColor),
                 );
               },
             ),
@@ -176,20 +158,19 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-/// Wordmark "WarisTech" muncul huruf-per-huruf (fade + slide naik) dalam
-/// jendela [begin]..[end] pada timeline entrance — efek "ketik" ringan
-/// tanpa `Animation` terpisah per huruf, murni aritmatika dari [value].
 class _StaggeredWord extends StatelessWidget {
   final String word;
   final double value;
   final double begin;
   final double end;
+  final Color color;
 
   const _StaggeredWord({
     required this.word,
     required this.value,
     required this.begin,
     required this.end,
+    required this.color,
   });
 
   @override
@@ -207,10 +188,7 @@ class _StaggeredWord extends StatelessWidget {
         final t = localEnd <= localBegin
             ? (value >= localBegin ? 1.0 : 0.0)
             : Curves.easeOut.transform(
-                ((value - localBegin) / (localEnd - localBegin)).clamp(
-                  0.0,
-                  1.0,
-                ),
+                ((value - localBegin) / (localEnd - localBegin)).clamp(0.0, 1.0),
               );
         return Opacity(
           opacity: t,
@@ -218,10 +196,10 @@ class _StaggeredWord extends StatelessWidget {
             offset: Offset(0, (1 - t) * 10),
             child: Text(
               letters[i],
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: color,
               ),
             ),
           ),
@@ -231,9 +209,6 @@ class _StaggeredWord extends StatelessWidget {
   }
 }
 
-/// Kedipan glow lembut di belakang logo — reuse [WtGlowBlob] (blur di-render
-/// SEKALI lewat parameter `child` pada [AnimatedBuilder], jadi setiap frame
-/// hanya mengubah opacity/compositing, BUKAN menghitung ulang blur-nya.
 class _PulseGlow extends StatelessWidget {
   final AnimationController loop;
   const _PulseGlow({required this.loop});
@@ -251,13 +226,11 @@ class _PulseGlow extends StatelessWidget {
   }
 }
 
-/// Tiga titik mengorbit lambat di sekeliling logo + cincin tipis statis —
-/// murni [CustomPainter] (beberapa `drawCircle` per frame), dibungkus
-/// [RepaintBoundary] supaya repaint-nya tidak ikut menggambar ulang teks di
-/// bawahnya yang sudah statis setelah entrance selesai.
 class _OrbitPainter extends CustomPainter {
   final double angle;
-  const _OrbitPainter({required this.angle});
+  final Color ringColor;
+
+  const _OrbitPainter({required this.angle, required this.ringColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -268,7 +241,7 @@ class _OrbitPainter extends CustomPainter {
       center,
       radius,
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.06)
+        ..color = ringColor.withValues(alpha: 0.06)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );
@@ -288,15 +261,14 @@ class _OrbitPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _OrbitPainter oldDelegate) =>
-      oldDelegate.angle != angle;
+      oldDelegate.angle != angle || oldDelegate.ringColor != ringColor;
 }
 
-/// Indikator muat pengganti `CircularProgressIndicator` generik — arc
-/// pendek yang berputar terus mengikuti [loop], gaya spinner yang senada
-/// dengan cincin orbit di atasnya alih-alih widget bawaan yang polos.
 class _SpinningArc extends StatelessWidget {
   final AnimationController loop;
-  const _SpinningArc({required this.loop});
+  final Color color;
+
+  const _SpinningArc({required this.loop, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +277,7 @@ class _SpinningArc extends StatelessWidget {
       builder: (context, _) {
         return CustomPaint(
           size: const Size(24, 24),
-          painter: _ArcPainter(angle: loop.value * 2 * math.pi * 2),
+          painter: _ArcPainter(angle: loop.value * 2 * math.pi * 2, color: color),
         );
       },
     );
@@ -314,7 +286,9 @@ class _SpinningArc extends StatelessWidget {
 
 class _ArcPainter extends CustomPainter {
   final double angle;
-  const _ArcPainter({required this.angle});
+  final Color color;
+
+  const _ArcPainter({required this.angle, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -325,7 +299,7 @@ class _ArcPainter extends CustomPainter {
       math.pi * 1.4,
       false,
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.75)
+        ..color = color.withValues(alpha: 0.75)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5
         ..strokeCap = StrokeCap.round,
@@ -334,5 +308,5 @@ class _ArcPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ArcPainter oldDelegate) =>
-      oldDelegate.angle != angle;
+      oldDelegate.angle != angle || oldDelegate.color != color;
 }
