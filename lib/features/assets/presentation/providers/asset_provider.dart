@@ -6,6 +6,7 @@ import 'package:wt_mobile/features/assets/data/repositories/asset_repository_imp
 import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
 import 'package:wt_mobile/features/assets/domain/entities/create_asset_result_entity.dart';
 import 'package:wt_mobile/features/assets/domain/repositories/asset_repository.dart';
+import 'package:wt_mobile/features/users/presentation/providers/user_provider.dart';
 
 /// Provider untuk daftar Notaris yang bisa dipilih saat membuat aset
 final notariesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
@@ -73,6 +74,29 @@ class CreateAssetNotifier
           result.asset.id,
           result.executorShare!,
         );
+      }
+
+      // OTOMATIS titipkan bagian Notaris jika ada.
+      if (result.notarisShare != null && result.asset.assignedNotarisId != null) {
+        try {
+          final notarisId = result.asset.assignedNotarisId!;
+          final keyInfo = await fetchNotarisPublicKey(notarisId);
+          final publicKeyPem = keyInfo['publicKey'] as String? ?? '';
+          if (publicKeyPem.isNotEmpty) {
+            final encryptedShare = RsaKeypairService.encryptWithPublicKeyPem(
+              result.notarisShare!,
+              publicKeyPem,
+            );
+            await _repository.escrowNotarisShare(
+              assetId: result.asset.id,
+              notarisId: notarisId,
+              encryptedShare: encryptedShare,
+            );
+          }
+        } catch (e) {
+          // Lanjutkan proses meskipun escrow gagal (bisa di-retry manual atau dicatat)
+          debugPrint('Gagal auto-escrow notaris share: $e');
+        }
       }
 
       _ref.invalidate(myAssetsProvider);

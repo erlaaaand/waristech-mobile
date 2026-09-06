@@ -95,18 +95,7 @@ class _ShareRevealScreenState extends ConsumerState<ShareRevealScreen> {
     final r = widget.result;
 
     return PopScope(
-      canPop: _confirmed,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Centang konfirmasi terlebih dahulu — bagian kunci ini tidak akan ditampilkan lagi.',
-            ),
-            backgroundColor: AppColors.danger,
-          ),
-        );
-      },
+      canPop: true,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Simpan Bagian Kunci'),
@@ -141,37 +130,50 @@ class _ShareRevealScreenState extends ConsumerState<ShareRevealScreen> {
                   icon: Icons.smartphone,
                 ),
                 const SizedBox(height: 16),
-                ShareCard(
-                  onCopy: (value, label) =>
-                      copyToClipboard(context, value, label),
-                  title: 'Bagian Kunci Notaris',
-                  subtitle:
-                      'Titipkan langsung ke Notaris di bawah (terenkripsi, '
-                      'server tidak dapat membukanya), atau serahkan manual '
-                      'lewat kanal aman lain.',
-                  value: r.notarisShare ?? '',
-                  color: AppColors.amber,
-                  icon: Icons.gavel_outlined,
-                ),
-                const SizedBox(height: 16),
-                EscrowSection(
-                  notarisIdController: _notarisIdCtrl,
-                  isDone: _escrowDone,
-                  isEscrowing: _isEscrowing,
-                  error: _escrowError,
-                  onEscrow: _escrowToNotaris,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: AppColors.success),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Kunci Notaris Terkirim',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.success,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Bagian kunci Notaris telah otomatis diamankan, dienkripsi, dan dititipkan ke Notaris pilihan Anda.',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                height: 1.4,
+                                color: AppColors.success.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 24),
-                ConfirmCheckbox(
-                  value: _confirmed,
-                  onChanged: (v) => setState(() => _confirmed = v),
-                ),
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _confirmed ? _finish : null,
+                    onPressed: _finish,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,

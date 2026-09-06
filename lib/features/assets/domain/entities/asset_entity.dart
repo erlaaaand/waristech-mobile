@@ -192,6 +192,7 @@ class AssetEntity {
   final String accountIdentifier;
   final AssetCustodyType custodyType;
   final AssetStatus status;
+  final String? assignedNotarisId;
   final String? verifiedByNotarisId;
   final DateTime? verifiedAt;
   final DateTime createdAt;
@@ -209,6 +210,7 @@ class AssetEntity {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.assignedNotarisId,
     this.verifiedByNotarisId,
     this.verifiedAt,
     this.allocations = const [],
@@ -229,6 +231,7 @@ class AssetEntity {
         json['custodyType'] as String? ?? 'VAULT',
       ),
       status: AssetStatus.fromString(json['status'] as String? ?? ''),
+      assignedNotarisId: json['assignedNotarisId'] as String?,
       verifiedByNotarisId: json['verifiedByNotarisId'] as String?,
       verifiedAt: json['verifiedAt'] != null
           ? DateTime.tryParse(json['verifiedAt'] as String)
