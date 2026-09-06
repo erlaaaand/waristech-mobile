@@ -44,8 +44,7 @@ class PewarisHomeView extends ConsumerWidget {
       decoration: BoxDecoration(
         // Light: kanvas abu premium. Dark: hitam scaffold — dulu selalu
         // gray50 di kedua tema, jadi tab ini tetap terang saat dark mode
-        // dinyalakan sementara dua tab Pewaris lain sudah benar.
-        color: isDark ? AppColors.darkBackground : AppColors.gray50,
+        color: isDark ? AppColors.darkBackground : AppColors.background,
       ),
       child: SafeArea(
         bottom: false,

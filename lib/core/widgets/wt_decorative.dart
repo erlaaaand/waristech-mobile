@@ -49,7 +49,7 @@ class WtAuthBackdrop extends StatelessWidget {
         
     final blobColor2 = isDark 
         ? Colors.white.withValues(alpha: 0.03) 
-        : AppColors.amber.withValues(alpha: 0.1);
+        : AppColors.primaryMedium.withValues(alpha: 0.1);
 
     return Stack(
       children: [

@@ -71,14 +71,16 @@ class WtPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
+          foregroundColor: isDark ? AppColors.primaryDeep : Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -91,12 +93,12 @@ class WtPrimaryButton extends StatelessWidget {
             child: ScaleTransition(scale: animation, child: child),
           ),
           child: isLoading
-              ? const SizedBox(
-                  key: ValueKey('loading'),
+              ? SizedBox(
+                  key: const ValueKey('loading'),
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: isDark ? AppColors.primaryDeep : Colors.white,
                     strokeWidth: 3,
                   ),
                 )

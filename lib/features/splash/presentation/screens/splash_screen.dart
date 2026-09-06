@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 
-const _kAccentGlow = Color(0xFF38BDF8);
+const _kAccentGlow = Color(0xFF80AAD3);
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

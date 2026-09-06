@@ -85,7 +85,7 @@ class WtEmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: iconSize, color: iconColor ?? AppColors.gray500),
+              Icon(icon, size: iconSize, color: iconColor ?? AppColors.primaryLight),
               const SizedBox(height: 12),
             ],
             Text(

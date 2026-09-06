@@ -58,7 +58,7 @@ class _PewarisDashboardScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.gray50,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       // Prototipe tidak punya top app bar terpisah — baris sapaan/judul
       // adalah bagian dari konten yang ikut scroll di tiap tab. Karena tidak
       // ada AppBar yang biasanya menyisihkan area status bar, konten WAJIB

@@ -322,12 +322,12 @@ class _CustodyOption extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? AppColors.primary.withValues(alpha: 0.08)
-              : Colors.black.withValues(alpha: 0.02),
+              : AppColors.primaryDeep.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
                 ? AppColors.primary
-                : Colors.black.withValues(alpha: 0.08),
+                : AppColors.primaryDeep.withValues(alpha: 0.08),
             width: selected ? 1.5 : 1,
           ),
         ),

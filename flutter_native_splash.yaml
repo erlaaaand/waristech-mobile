@@ -9,12 +9,12 @@ flutter_native_splash:
   #
   # Warna mengikuti tema monokrom prototipe (`mobile.css`): hitam pekat,
   # bukan navy biru versi lama.
-  color: "#000000"
-  color_dark: "#000000"
+  color: "#000F22"
+  color_dark: "#000F22"
 
   android_12:
-    color: "#000000"
-    color_dark: "#000000"
+    color: "#000F22"
+    color_dark: "#000F22"
 
   android: true
   ios: true

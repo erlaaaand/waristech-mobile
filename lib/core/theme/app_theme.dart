@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'app_colors.dart';
 
 class AppTheme {
@@ -8,29 +7,59 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.light,
       primaryColor: AppColors.primary,
-      // Prototipe: body{background:var(--white)} — putih polos, bukan gray-50.
-      scaffoldBackgroundColor: AppColors.surface,
+      scaffoldBackgroundColor: AppColors.background,
+      dividerColor: AppColors.divider,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
-        secondary: AppColors.amber,
+        primaryContainer: AppColors.primaryLight,
+        secondary: AppColors.primaryMedium,
+        secondaryContainer: AppColors.primaryLightest,
         surface: AppColors.surface,
         onPrimary: Colors.white,
-        onSurface: AppColors.textLight,
+        onSecondary: Colors.white,
+        onSurface: AppColors.textPrimary,
+        outline: AppColors.divider,
       ),
       textTheme: GoogleFonts.interTextTheme().apply(
-        bodyColor: AppColors.textLight,
-        displayColor: AppColors.textLight,
+        bodyColor: AppColors.textPrimary,
+        displayColor: AppColors.textPrimary,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        iconTheme: IconThemeData(color: AppColors.navy),
+        iconTheme: IconThemeData(color: AppColors.primaryDeep),
         titleTextStyle: TextStyle(
-          color: AppColors.navy,
+          color: AppColors.primaryDeep,
           fontSize: 17,
           fontWeight: FontWeight.bold,
           letterSpacing: -0.5,
         ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.warm,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.divider,
+        thickness: 1,
       ),
     );
   }
@@ -38,14 +67,19 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: AppColors.primary,
+      primaryColor: AppColors.primaryLight,
       scaffoldBackgroundColor: AppColors.darkBackground,
+      dividerColor: AppColors.primaryDark,
       colorScheme: const ColorScheme.dark(
-        primary: Colors.white,
-        secondary: AppColors.amber,
+        primary: AppColors.primaryLight,
+        primaryContainer: AppColors.primaryDark,
+        secondary: AppColors.primaryMedium,
+        secondaryContainer: AppColors.primaryDark,
         surface: AppColors.darkSurface,
-        onPrimary: Colors.black,
+        onPrimary: AppColors.primaryDeep,
+        onSecondary: Colors.white,
         onSurface: AppColors.textDark,
+        outline: AppColors.primaryDark,
       ),
       textTheme: GoogleFonts.interTextTheme().apply(
         bodyColor: AppColors.textDark,
@@ -61,6 +95,37 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           letterSpacing: -0.5,
         ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryLight,
+          foregroundColor: AppColors.primaryDeep,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.darkSurface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: AppColors.primaryDark.withValues(alpha: 0.3),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: AppColors.primaryLight,
+            width: 1.5,
+          ),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.primaryDark,
+        thickness: 1,
       ),
     );
   }

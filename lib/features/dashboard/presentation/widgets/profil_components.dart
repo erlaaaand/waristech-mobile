@@ -123,7 +123,7 @@ class SettingsRow extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isMuted
         ? AppColors.gray400
-        : (isDark ? Colors.white : Colors.black);
+        : (isDark ? Colors.white : AppColors.primaryDeep);
 
     return InkWell(
       onTap: onTap,

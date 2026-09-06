@@ -26,8 +26,7 @@ class SavedAssetsHeroCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+            colors: [AppColors.primaryDark, AppColors.primaryDeep],
           ),
           boxShadow: [
             BoxShadow(

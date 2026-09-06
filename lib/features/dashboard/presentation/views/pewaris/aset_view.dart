@@ -32,8 +32,8 @@ class _PewarisAsetViewState extends ConsumerState<PewarisAsetView> {
           height: 50,
           child: FloatingActionButton(
             onPressed: () => context.pushNamed('create-asset'),
-            backgroundColor: isDark ? Colors.white : Colors.black,
-            foregroundColor: isDark ? Colors.black : Colors.white,
+            backgroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
+            foregroundColor: isDark ? AppColors.primaryDeep : Colors.white,
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),

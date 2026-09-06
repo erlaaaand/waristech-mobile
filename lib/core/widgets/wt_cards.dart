@@ -353,6 +353,7 @@ class WtSurfaceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.surface,
         borderRadius: BorderRadius.circular(borderRadius),
+        border: isDark ? Border.all(color: AppColors.primaryDark.withValues(alpha: 0.15)) : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),

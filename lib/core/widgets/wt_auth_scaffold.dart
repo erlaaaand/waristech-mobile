@@ -210,7 +210,7 @@ class _WtAuthFieldState extends State<WtAuthField> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final obscure = widget.isPassword && !_isRevealed;
-    final accent = isDark ? Colors.white : AppColors.primary;
+    final accent = isDark ? AppColors.primaryLight : AppColors.primary;
 
     return TextFormField(
       controller: widget.controller,
@@ -294,8 +294,8 @@ class WtAuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Colors.white : AppColors.primary;
-    final fg = isDark ? AppColors.primary : Colors.white;
+    final bg = isDark ? AppColors.primaryLight : AppColors.primary;
+    final fg = isDark ? AppColors.primaryDeep : Colors.white;
 
     return SizedBox(
       width: double.infinity,
@@ -400,7 +400,7 @@ class _WtOtpFieldState extends State<WtOtpField> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? Colors.white : AppColors.primary;
+    final accent = isDark ? AppColors.primaryLight : AppColors.primary;
 
     final boxes = Row(
       children: List.generate(widget.length * 2 - 1, (i) {

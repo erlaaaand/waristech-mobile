@@ -135,7 +135,7 @@ class WtAnimatedRadio<T> extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: selected ? AppColors.rose : const Color(0xFFCBD5E1),
+            color: selected ? AppColors.rose : AppColors.divider,
             width: 2,
           ),
         ),
