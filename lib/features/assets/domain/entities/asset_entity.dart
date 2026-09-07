@@ -183,6 +183,52 @@ enum AssetCustodyType {
   }
 }
 
+/// Skema hukum waris yang dipilih Pewaris untuk SATU aset (label mengikat,
+/// bukan perhitungan otomatis) — cocok persis dengan CalculationMethod enum
+/// backend. Bisa diubah Pewaris selama aset masih pendingVerification,
+/// terkunci otomatis begitu Notaris memverifikasi aset (aturan yang sama
+/// dengan lock alokasi).
+enum InheritanceScheme {
+  faraidh,
+  civil,
+  customary;
+
+  static InheritanceScheme? fromString(String? value) {
+    switch (value?.toUpperCase()) {
+      case 'FARAIDH':
+        return InheritanceScheme.faraidh;
+      case 'CIVIL':
+        return InheritanceScheme.civil;
+      case 'CUSTOMARY':
+        return InheritanceScheme.customary;
+      default:
+        return null;
+    }
+  }
+
+  String get displayName {
+    switch (this) {
+      case InheritanceScheme.faraidh:
+        return 'Faraidh';
+      case InheritanceScheme.civil:
+        return 'Perdata';
+      case InheritanceScheme.customary:
+        return 'Adat';
+    }
+  }
+
+  String get backendValue {
+    switch (this) {
+      case InheritanceScheme.faraidh:
+        return 'FARAIDH';
+      case InheritanceScheme.civil:
+        return 'CIVIL';
+      case InheritanceScheme.customary:
+        return 'CUSTOMARY';
+    }
+  }
+}
+
 class AssetEntity {
   final String id;
   final String pewarisId;
@@ -193,6 +239,7 @@ class AssetEntity {
   final AssetCustodyType custodyType;
   final AssetStatus status;
   final String? assignedNotarisId;
+  final InheritanceScheme? inheritanceScheme;
   final String? verifiedByNotarisId;
   final DateTime? verifiedAt;
   final DateTime createdAt;
@@ -211,6 +258,7 @@ class AssetEntity {
     required this.createdAt,
     required this.updatedAt,
     this.assignedNotarisId,
+    this.inheritanceScheme,
     this.verifiedByNotarisId,
     this.verifiedAt,
     this.allocations = const [],
@@ -218,6 +266,10 @@ class AssetEntity {
 
   /// Aset yang kredensialnya dititipkan (punya bagian kunci untuk dibuka).
   bool get isVaultCustody => custodyType == AssetCustodyType.vault;
+
+  /// Skema (dan alokasi) hanya bisa diubah selama aset masih menunggu
+  /// verifikasi — begitu Notaris memverifikasi, keduanya terkunci.
+  bool get isSchemeLocked => status != AssetStatus.pendingVerification;
 
   factory AssetEntity.fromJson(Map<String, dynamic> json) {
     return AssetEntity(
@@ -232,6 +284,9 @@ class AssetEntity {
       ),
       status: AssetStatus.fromString(json['status'] as String? ?? ''),
       assignedNotarisId: json['assignedNotarisId'] as String?,
+      inheritanceScheme: InheritanceScheme.fromString(
+        json['inheritanceScheme'] as String?,
+      ),
       verifiedByNotarisId: json['verifiedByNotarisId'] as String?,
       verifiedAt: json['verifiedAt'] != null
           ? DateTime.tryParse(json['verifiedAt'] as String)

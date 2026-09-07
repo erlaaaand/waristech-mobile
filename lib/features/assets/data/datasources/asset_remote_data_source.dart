@@ -38,6 +38,7 @@ class AssetRemoteDataSource extends BaseRemoteDataSource {
     required String accountIdentifier,
     required String assignedNotarisId,
     required String custodyType,
+    String? inheritanceScheme,
     Map<String, dynamic>? secret,
   }) {
     return safeCall(() async {
@@ -49,9 +50,26 @@ class AssetRemoteDataSource extends BaseRemoteDataSource {
         'accountIdentifier': accountIdentifier,
         'assignedNotarisId': assignedNotarisId,
         'custodyType': custodyType,
+        'inheritanceScheme': ?inheritanceScheme,
         'secret': ?secret,
       };
       final response = await dio.post<dynamic>('/assets', data: body);
+      return unwrapData(response.data) as Map<String, dynamic>;
+    });
+  }
+
+  /// PATCH /assets/:id — hanya dipakai untuk mengubah skema waris sebelum
+  /// terkunci (Notaris belum memverifikasi aset).
+  Future<Map<String, dynamic>> updateAssetScheme({
+    required String assetId,
+    required String inheritanceScheme,
+  }) {
+    return safeCall(() async {
+      await _ensureCsrf();
+      final response = await dio.patch<dynamic>(
+        '/assets/$assetId',
+        data: {'inheritanceScheme': inheritanceScheme},
+      );
       return unwrapData(response.data) as Map<String, dynamic>;
     });
   }

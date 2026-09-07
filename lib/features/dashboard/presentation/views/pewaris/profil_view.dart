@@ -8,12 +8,10 @@ import 'package:wt_mobile/features/dashboard/presentation/widgets/profil_compone
 
 class PewarisProfilView extends ConsumerWidget {
   final VoidCallback onOpenProtocol;
-  final VoidCallback onOpenHukumWaris;
 
   const PewarisProfilView({
     super.key,
     required this.onOpenProtocol,
-    required this.onOpenHukumWaris,
   });
 
   @override
@@ -33,11 +31,6 @@ class PewarisProfilView extends ConsumerWidget {
           const SectionLabel('Perencanaan Waris'),
           SettingsGroup(
             children: [
-              SettingsRow(
-                icon: Icons.balance_outlined,
-                label: 'Skema Waris',
-                onTap: onOpenHukumWaris,
-              ),
               SettingsRow(
                 icon: Icons.verified_user_outlined,
                 label: 'Kontak Darurat',

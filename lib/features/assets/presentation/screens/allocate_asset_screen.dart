@@ -117,6 +117,7 @@ class _AllocateAssetScreenState extends ConsumerState<AllocateAssetScreen> {
               _AllocationSummary(
                 asset: widget.asset,
                 allocatedSoFar: _allocatedSoFar,
+                members: membersAsync.valueOrNull ?? const [],
               ),
               const SizedBox(height: 20),
               if (isLocked) ...[
@@ -212,13 +213,96 @@ class _AllocateAssetScreenState extends ConsumerState<AllocateAssetScreen> {
   }
 }
 
-class _AllocationSummary extends StatelessWidget {
+class _AllocationSummary extends ConsumerWidget {
   final AssetEntity asset;
   final double allocatedSoFar;
-  const _AllocationSummary({required this.asset, required this.allocatedSoFar});
+  final List<dynamic> members;
+  const _AllocationSummary({
+    required this.asset,
+    required this.allocatedSoFar,
+    this.members = const [],
+  });
+
+  /// Nama Ahli Waris dari daftar anggota keluarga Pewaris — allocation entity
+  /// hanya menyimpan ahliWarisId (UUID), jadi nama harus dicocokkan lewat ID.
+  String _nameFor(String ahliWarisId) {
+    final match = members.whereType<Map<String, dynamic>>().where(
+      (m) => m['ahliWarisId']?.toString() == ahliWarisId,
+    );
+    if (match.isEmpty) return 'Ahli Waris';
+    final name = match.first['ahliWarisName']?.toString();
+    return (name != null && name.isNotEmpty) ? name : 'Ahli Waris';
+  }
+
+  Future<void> _showSchemeEditor(BuildContext context, WidgetRef ref) async {
+    var selected = asset.inheritanceScheme;
+    final chosen = await showModalBottomSheet<InheritanceScheme?>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Ubah Skema Waris',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: InheritanceScheme.values.map((scheme) {
+                  final isSelected = selected == scheme;
+                  return ChoiceChip(
+                    label: Text(scheme.displayName),
+                    selected: isSelected,
+                    onSelected: (_) => setSheetState(
+                      () => selected = isSelected ? null : scheme,
+                    ),
+                    selectedColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: isSelected ? Colors.white : null,
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, selected),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Simpan'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (chosen == null || chosen == asset.inheritanceScheme) return;
+    if (!context.mounted) return;
+    await ref
+        .read(updateAssetSchemeProvider(asset.id).notifier)
+        .update(assetId: asset.id, inheritanceScheme: chosen.backendValue);
+    if (!context.mounted) return;
+    final state = ref.read(updateAssetSchemeProvider(asset.id));
+    if (state.hasError) {
+      WtSnackbar.error(context, state.error.toString());
+    } else {
+      WtSnackbar.success(context, 'Skema waris diperbarui.');
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return WtSurfaceCard(
       padding: const EdgeInsets.all(18),
       child: Column(
@@ -254,6 +338,46 @@ class _AllocationSummary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.balance_outlined,
+                      size: 15,
+                      color: AppColors.gray500,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      asset.inheritanceScheme != null
+                          ? 'Skema ${asset.inheritanceScheme!.displayName}'
+                          : 'Skema belum ditentukan',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.gray500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!asset.isSchemeLocked)
+                TextButton(
+                  onPressed: () => _showSchemeEditor(context, ref),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                  ),
+                  child: const Text(
+                    'Ubah',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
           if (asset.allocations.isEmpty)
             const Text(
               'Belum ada alokasi.',
@@ -267,7 +391,7 @@ class _AllocationSummary extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        a.ahliWarisId,
+                        _nameFor(a.ahliWarisId),
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 12.5),
                       ),
@@ -330,11 +454,13 @@ class _MemberDropdown extends StatelessWidget {
       ),
       items: items.map((m) {
         final id = m['ahliWarisId']?.toString() ?? '';
+        final name = (m['ahliWarisName']?.toString().isNotEmpty ?? false)
+            ? m['ahliWarisName'].toString()
+            : 'Ahli Waris';
         final desc = m['relationshipDescription']?.toString() ?? '-';
-        final status = m['status']?.toString() ?? '';
         return DropdownMenuItem(
           value: id,
-          child: Text('$desc ($status)', overflow: TextOverflow.ellipsis),
+          child: Text('$name ($desc)', overflow: TextOverflow.ellipsis),
         );
       }).toList(),
       onChanged: onChanged,

@@ -55,6 +55,7 @@ class CreateAssetNotifier
     required String accountIdentifier,
     required String assignedNotarisId,
     required String custodyType,
+    String? inheritanceScheme,
     Map<String, dynamic>? secret,
   }) async {
     state = const AsyncValue.loading();
@@ -66,6 +67,7 @@ class CreateAssetNotifier
         accountIdentifier: accountIdentifier,
         assignedNotarisId: assignedNotarisId,
         custodyType: custodyType,
+        inheritanceScheme: inheritanceScheme,
         secret: secret,
       );
 
@@ -115,6 +117,37 @@ final createAssetProvider =
       AsyncValue<CreateAssetResultEntity?>
     >((ref) {
       return CreateAssetNotifier(ref.watch(assetRepositoryProvider), ref);
+    });
+
+/// Notifier untuk mengubah skema waris SEBELUM terkunci (Notaris belum
+/// memverifikasi aset) — satu instance per assetId.
+class UpdateAssetSchemeNotifier extends StateNotifier<AsyncValue<void>> {
+  final AssetRepository _repository;
+  final Ref _ref;
+  UpdateAssetSchemeNotifier(this._repository, this._ref)
+    : super(const AsyncValue.data(null));
+
+  Future<void> update({
+    required String assetId,
+    required String inheritanceScheme,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _repository.updateAssetScheme(
+        assetId: assetId,
+        inheritanceScheme: inheritanceScheme,
+      );
+      _ref.invalidate(myAssetsProvider);
+    });
+  }
+}
+
+final updateAssetSchemeProvider = StateNotifierProvider.family
+    .autoDispose<UpdateAssetSchemeNotifier, AsyncValue<void>, String>((
+      ref,
+      assetId,
+    ) {
+      return UpdateAssetSchemeNotifier(ref.watch(assetRepositoryProvider), ref);
     });
 
 // ---------------------------------------------------------------------------

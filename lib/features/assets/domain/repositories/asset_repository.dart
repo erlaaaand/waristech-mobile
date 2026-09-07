@@ -15,7 +15,13 @@ abstract class AssetRepository {
     required String accountIdentifier,
     required String assignedNotarisId,
     required String custodyType,
+    String? inheritanceScheme,
     Map<String, dynamic>? secret,
+  });
+
+  Future<AssetEntity> updateAssetScheme({
+    required String assetId,
+    required String inheritanceScheme,
   });
 
   Future<AssetGuidanceEntity> getGuidance(String assetId);

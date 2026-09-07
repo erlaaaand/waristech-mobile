@@ -4,7 +4,6 @@ import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/aset_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/home_view.dart';
-import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/hukum_waris_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/profil_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/pewaris/protokol_view.dart';
 import 'package:wt_mobile/features/inheritance/presentation/screens/invitations_screen.dart';
@@ -12,11 +11,11 @@ import 'package:wt_mobile/features/inheritance/presentation/screens/invitations_
 /// Shell screen untuk role Pewaris.
 ///
 /// Navigasi mengikuti prototipe `index.html`: TIGA tab dalam pil hitam
-/// mengambang (Brankas — Beranda di tengah & terangkat — Profil). Dua modul
-/// lain (Skema Waris & Protokol Darurat) bukan tab, melainkan halaman yang
-/// dibuka dari kartu Ringkasan di Beranda dan dari daftar di tab Profil —
-/// memaksakan lima ikon ke dalam pil selebar 220px akan berdesakan dan
-/// merusak bentuk nav yang jadi ciri khas desainnya.
+/// mengambang (Brankas — Beranda di tengah & terangkat — Profil). Protokol
+/// Darurat bukan tab, melainkan halaman yang dibuka dari kartu Ringkasan di
+/// Beranda dan dari daftar di tab Profil — memaksakan ikon tambahan ke dalam
+/// pil selebar 220px akan berdesakan dan merusak bentuk nav yang jadi ciri
+/// khas desainnya.
 class PewarisDashboardScreen extends ConsumerStatefulWidget {
   const PewarisDashboardScreen({super.key});
 
@@ -78,11 +77,9 @@ class _PewarisDashboardScreenState
               onOpenProfile: () => _navigate(2),
               onOpenHeirs: () => _openPage(const InvitationsScreen()),
               onOpenProtocol: () => _openPage(const PewarisProtokolPage()),
-              onOpenHukumWaris: () => _openPage(const PewarisHukumWarisPage()),
             ),
             PewarisProfilView(
               onOpenProtocol: () => _openPage(const PewarisProtokolPage()),
-              onOpenHukumWaris: () => _openPage(const PewarisHukumWarisPage()),
             ),
           ],
         ),
@@ -105,19 +102,6 @@ class PewarisProtokolPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Kontak Darurat')),
       body: const PewarisProtokolView(),
-    );
-  }
-}
-
-/// Pembungkus halaman (bukan tab) untuk Skema Waris.
-class PewarisHukumWarisPage extends StatelessWidget {
-  const PewarisHukumWarisPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Skema Waris')),
-      body: const PewarisHukumWarisView(),
     );
   }
 }

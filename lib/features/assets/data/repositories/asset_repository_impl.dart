@@ -37,6 +37,7 @@ class AssetRepositoryImpl implements AssetRepository {
     required String accountIdentifier,
     required String assignedNotarisId,
     required String custodyType,
+    String? inheritanceScheme,
     Map<String, dynamic>? secret,
   }) async {
     final json = await _remoteDataSource.createAsset(
@@ -46,9 +47,22 @@ class AssetRepositoryImpl implements AssetRepository {
       accountIdentifier: accountIdentifier,
       assignedNotarisId: assignedNotarisId,
       custodyType: custodyType,
+      inheritanceScheme: inheritanceScheme,
       secret: secret,
     );
     return CreateAssetResultEntity.fromJson(json);
+  }
+
+  @override
+  Future<AssetEntity> updateAssetScheme({
+    required String assetId,
+    required String inheritanceScheme,
+  }) async {
+    final json = await _remoteDataSource.updateAssetScheme(
+      assetId: assetId,
+      inheritanceScheme: inheritanceScheme,
+    );
+    return AssetEntity.fromJson(json);
   }
 
   @override

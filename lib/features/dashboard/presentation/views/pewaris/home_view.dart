@@ -12,7 +12,6 @@ class PewarisHomeView extends ConsumerWidget {
   final VoidCallback onOpenProfile;
   final VoidCallback onOpenHeirs;
   final VoidCallback onOpenProtocol;
-  final VoidCallback onOpenHukumWaris;
 
   const PewarisHomeView({
     super.key,
@@ -20,7 +19,6 @@ class PewarisHomeView extends ConsumerWidget {
     required this.onOpenProfile,
     required this.onOpenHeirs,
     required this.onOpenProtocol,
-    required this.onOpenHukumWaris,
   });
 
   @override
@@ -180,11 +178,6 @@ class PewarisHomeView extends ConsumerWidget {
 
                     // 5. Ahli Waris (Quick Send Replacement)
                     AhliWarisSection(onOpenHeirs: onOpenHeirs),
-
-                    const SizedBox(height: 32),
-
-                    // 6. Skema Waris (ringkasan, tautan ke halaman penuh)
-                    SkemaWarisSummarySection(onOpenHukumWaris: onOpenHukumWaris),
                   ],
                 ),
               ),

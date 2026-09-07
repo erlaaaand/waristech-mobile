@@ -17,6 +17,11 @@ class AssetItem extends StatelessWidget {
     final identifier = asset.accountIdentifier.isEmpty
         ? '••••••••'
         : asset.accountIdentifier;
+    final allocatedPercentage = asset.allocations.fold<double>(
+      0,
+      (sum, a) => sum + a.percentage,
+    );
+    final heirCount = asset.allocations.length;
 
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
@@ -33,7 +38,10 @@ class AssetItem extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
           children: [
             Container(
               width: 44,
@@ -66,7 +74,9 @@ class AssetItem extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    asset.type.displayName,
+                    asset.inheritanceScheme != null
+                        ? '${asset.type.displayName} · Skema ${asset.inheritanceScheme!.displayName}'
+                        : asset.type.displayName,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: const TextStyle(
@@ -132,6 +142,45 @@ class AssetItem extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: allocatedPercentage >= 100
+                    ? AppColors.success.withValues(alpha: 0.1)
+                    : (isDark ? AppColors.darkSurface : AppColors.gray100),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    heirCount == 0
+                        ? Icons.person_add_alt_1_outlined
+                        : Icons.groups_outlined,
+                    size: 13,
+                    color: allocatedPercentage >= 100
+                        ? AppColors.success
+                        : AppColors.gray500,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    heirCount == 0
+                        ? 'Belum dialokasikan'
+                        : '${allocatedPercentage.toStringAsFixed(0)}% · $heirCount ahli waris',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: allocatedPercentage >= 100
+                          ? AppColors.success
+                          : AppColors.gray500,
+                    ),
                   ),
                 ],
               ),

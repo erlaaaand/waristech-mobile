@@ -21,6 +21,9 @@ class FamilyMemberReviewCard extends ConsumerWidget {
     final relation = (member['relationshipDescription']?.toString().isNotEmpty ?? false)
         ? member['relationshipDescription'].toString()
         : 'Hubungan belum diisi';
+    final name = (member['ahliWarisName']?.toString().isNotEmpty ?? false)
+        ? member['ahliWarisName'].toString()
+        : 'Ahli Waris';
     final documentUrl = member['supportingDocumentUrl']?.toString();
     final actionState = ref.watch(familyMemberActionProvider(id));
 
@@ -52,23 +55,23 @@ class FamilyMemberReviewCard extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              InitialAvatar(initial: relation[0].toUpperCase()),
+              InitialAvatar(initial: name[0].toUpperCase()),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      relation,
+                      name,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
-                      'Relasi Non-Nasab',
-                      style: TextStyle(fontSize: 12, color: AppColors.gray500),
+                    Text(
+                      '$relation · Non-Nasab',
+                      style: const TextStyle(fontSize: 12, color: AppColors.gray500),
                     ),
                   ],
                 ),

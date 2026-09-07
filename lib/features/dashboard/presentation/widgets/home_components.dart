@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
-import 'package:wt_mobile/features/calculation/presentation/providers/calculation_provider.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
-import 'package:wt_mobile/features/dashboard/presentation/widgets/hukum_waris_components.dart';
 import 'package:wt_mobile/features/proof_of_life/domain/entities/proof_of_life_status_entity.dart';
-
-const _hukumWarisMethodValues = ['CIVIL', 'CUSTOMARY', 'FARAIDH'];
-const _hukumWarisSchemeLabels = ['Perdata', 'Adat', 'Faraidh'];
 
 class SavedAssetsHeroCard extends StatelessWidget {
   final AsyncValue<List<AssetEntity>> assetsAsync;
@@ -600,7 +595,13 @@ class AhliWarisSection extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: members.map((member) {
-                  final name = member['full_name'] as String? ?? 'A';
+                  final name =
+                      (member['ahliWarisName'] as String?)?.trim().isNotEmpty ==
+                              true
+                          ? member['ahliWarisName'] as String
+                          : (member['relationshipDescription'] as String?)
+                                  ?.trim() ??
+                              'Ahli Waris';
                   return Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: Column(
@@ -644,74 +645,6 @@ class AhliWarisSection extends ConsumerWidget {
           },
         ),
       ],
-    );
-  }
-}
-
-class SkemaWarisSummarySection extends ConsumerWidget {
-  final VoidCallback onOpenHukumWaris;
-
-  const SkemaWarisSummarySection({super.key, required this.onOpenHukumWaris});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final preferenceAsync = ref.watch(calculationPreferenceProvider);
-    final familyAsync = ref.watch(familyMembersProvider);
-
-    final selectedIndex = preferenceAsync.maybeWhen(
-      data: (method) => _hukumWarisMethodValues.indexOf(method ?? ''),
-      orElse: () => -1,
-    );
-    final schemeName = selectedIndex >= 0
-        ? _hukumWarisSchemeLabels[selectedIndex]
-        : '—';
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: GestureDetector(
-        onTap: onOpenHukumWaris,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Skema Waris',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : AppColors.gray900,
-                  ),
-                ),
-                Text(
-                  'Atur >',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.5)
-                        : AppColors.gray500,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            familyAsync.when(
-              loading: () => const CardSkeleton(),
-              error: (_, _) => SummaryCard(
-                schemeName: schemeName,
-                memberCount: 0,
-              ),
-              data: (members) => SummaryCard(
-                schemeName: schemeName,
-                memberCount: members.length,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

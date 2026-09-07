@@ -31,6 +31,7 @@ class _CreateAssetScreenState extends ConsumerState<CreateAssetScreen> {
   AssetType _type = AssetType.crypto;
   AssetCustodyType _custodyType = AssetCustodyType.vault;
   String? _selectedNotarisId;
+  InheritanceScheme? _scheme;
 
   @override
   void dispose() {
@@ -66,6 +67,7 @@ class _CreateAssetScreenState extends ConsumerState<CreateAssetScreen> {
       custodyType: _custodyType == AssetCustodyType.vault
           ? 'VAULT'
           : 'GUIDANCE',
+      inheritanceScheme: _scheme?.backendValue,
       secret: _custodyType == AssetCustodyType.vault
           ? {
               if (_usernameCtrl.text.trim().isNotEmpty)
@@ -153,6 +155,11 @@ class _CreateAssetScreenState extends ConsumerState<CreateAssetScreen> {
                 _NotarisSelector(
                   value: _selectedNotarisId,
                   onChanged: (val) => setState(() => _selectedNotarisId = val),
+                ),
+                const SizedBox(height: 24),
+                _SchemeSelector(
+                  value: _scheme,
+                  onChanged: (v) => setState(() => _scheme = v),
                 ),
                 const SizedBox(height: 24),
                 _CustodySelector(
@@ -257,6 +264,62 @@ class _AssetTypeDropdown extends StatelessWidget {
         if (v == null) return;
         onChanged(v);
       },
+    );
+  }
+}
+
+/// Pemilih skema hukum waris untuk aset ini (opsional, label mengikat —
+/// lihat doc-comment InheritanceScheme). Memilih ulang skema yang sama
+/// membatalkan pilihan (kembali "Tidak ditentukan").
+class _SchemeSelector extends StatelessWidget {
+  final InheritanceScheme? value;
+  final ValueChanged<InheritanceScheme?> onChanged;
+
+  const _SchemeSelector({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Skema Waris (opsional)',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Penanda skema yang harus diikuti Notaris saat eksekusi pembagian. '
+          'Bisa diubah sebelum Notaris memverifikasi aset ini.',
+          style: TextStyle(fontSize: 12, color: AppColors.gray500, height: 1.3),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: InheritanceScheme.values.map((scheme) {
+            final selected = value == scheme;
+            return ChoiceChip(
+              label: Text(scheme.displayName),
+              selected: selected,
+              onSelected: (_) => onChanged(selected ? null : scheme),
+              labelStyle: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: selected ? Colors.white : null,
+              ),
+              selectedColor: AppColors.primary,
+              backgroundColor: AppColors.primaryDeep.withValues(alpha: 0.04),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: selected
+                      ? AppColors.primary
+                      : AppColors.primaryDeep.withValues(alpha: 0.08),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 }
