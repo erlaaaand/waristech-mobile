@@ -230,7 +230,16 @@ class _AllocationSummary extends ConsumerWidget {
       (m) => m['ahliWarisId']?.toString() == ahliWarisId,
     );
     if (match.isEmpty) return 'Ahli Waris';
-    final name = match.first['ahliWarisName']?.toString();
+    
+    final m = match.first;
+    final ahliWarisObj = m['ahliWaris'] as Map<String, dynamic>?;
+    final accountName = ahliWarisObj?['fullName']?.toString();
+    
+    if (accountName != null && accountName.isNotEmpty) {
+      return accountName;
+    }
+    
+    final name = m['ahliWarisName']?.toString();
     return (name != null && name.isNotEmpty) ? name : 'Ahli Waris';
   }
 
@@ -444,25 +453,36 @@ class _MemberDropdown extends StatelessWidget {
         style: TextStyle(color: AppColors.gray500, fontSize: 13),
       );
     }
-    return DropdownButtonFormField<String>(
-      initialValue: selectedId,
-      isExpanded: true,
-      decoration: InputDecoration(
-        labelText: 'Ahli Waris',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-        filled: true,
-      ),
-      items: items.map((m) {
-        final id = m['ahliWarisId']?.toString() ?? '';
-        final name = (m['ahliWarisName']?.toString().isNotEmpty ?? false)
+    
+    final dropdownItems = items.map((m) {
+      final id = m['ahliWarisId']?.toString() ?? '';
+      
+      // Jika sudah dikonfirmasi, gunakan nama asli dari akun ahli waris
+      final ahliWarisObj = m['ahliWaris'] as Map<String, dynamic>?;
+      final accountName = ahliWarisObj?['fullName']?.toString();
+      
+      String name;
+      if (accountName != null && accountName.isNotEmpty) {
+        name = accountName;
+      } else {
+        name = (m['ahliWarisName']?.toString().isNotEmpty ?? false)
             ? m['ahliWarisName'].toString()
             : 'Ahli Waris';
-        final desc = m['relationshipDescription']?.toString() ?? '-';
-        return DropdownMenuItem(
-          value: id,
-          child: Text('$name ($desc)', overflow: TextOverflow.ellipsis),
-        );
-      }).toList(),
+      }
+      
+      final desc = m['relationshipDescription']?.toString() ?? '-';
+      
+      return WtDropdownItem(
+        value: id,
+        label: '$name ($desc)',
+        avatarUrl: ahliWarisObj?['avatarUrl']?.toString() ?? '',
+      );
+    }).toList();
+
+    return WtDropdownField<String>(
+      label: 'Ahli Waris',
+      value: selectedId,
+      items: dropdownItems,
       onChanged: onChanged,
     );
   }

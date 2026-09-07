@@ -299,8 +299,9 @@ class WtConsentCheckbox extends StatelessWidget {
 class WtDropdownItem<T> {
   final T value;
   final String label;
+  final String? avatarUrl;
 
-  const WtDropdownItem({required this.value, required this.label});
+  const WtDropdownItem({required this.value, required this.label, this.avatarUrl});
 }
 
 /// Dropdown field kustom yang persis sama dengan [WtFormField] namun 
@@ -379,6 +380,24 @@ class WtDropdownField<T> extends StatelessWidget {
                             : Colors.transparent,
                         child: Row(
                           children: [
+                            if (item.avatarUrl != null) ...[
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: isDark ? Colors.white24 : Colors.black12,
+                                backgroundImage: item.avatarUrl!.isNotEmpty ? NetworkImage(item.avatarUrl!) : null,
+                                onBackgroundImageError: item.avatarUrl!.isNotEmpty ? (_, __) {} : null,
+                                child: item.avatarUrl!.isEmpty
+                                    ? Text(
+                                        item.label.isNotEmpty ? item.label[0].toUpperCase() : '?',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 12),
+                            ],
                             Expanded(
                               child: Text(
                                 item.label,
@@ -480,6 +499,24 @@ class WtDropdownField<T> extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    if (selectedItem?.avatarUrl != null) ...[
+                      CircleAvatar(
+                        radius: 12,
+                        backgroundColor: isDark ? Colors.white24 : Colors.black12,
+                        backgroundImage: selectedItem!.avatarUrl!.isNotEmpty ? NetworkImage(selectedItem.avatarUrl!) : null,
+                        onBackgroundImageError: selectedItem.avatarUrl!.isNotEmpty ? (_, __) {} : null,
+                        child: selectedItem.avatarUrl!.isEmpty
+                            ? Text(
+                                selectedItem.label.isNotEmpty ? selectedItem.label[0].toUpperCase() : '?',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     Expanded(
                       child: Text(
                         displayLabel,

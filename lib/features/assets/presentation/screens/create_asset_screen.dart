@@ -456,6 +456,7 @@ class _NotarisSelector extends ConsumerWidget {
             return WtDropdownItem<String>(
               value: n['id'] as String,
               label: n['fullName'] as String,
+              avatarUrl: n['avatarUrl']?.toString() ?? '',
             );
           }).toList(),
           onChanged: onChanged,
