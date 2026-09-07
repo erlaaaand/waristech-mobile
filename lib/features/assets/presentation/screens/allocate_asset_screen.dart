@@ -239,8 +239,10 @@ class _AllocationSummary extends ConsumerWidget {
       return accountName;
     }
     
-    final name = m['ahliWarisName']?.toString();
-    return (name != null && name.isNotEmpty) ? name : 'Ahli Waris';
+    final name = m['ahliWarisName']?.toString().trim();
+    if (name != null && name.isNotEmpty) return name;
+    
+    return m['relationshipDescription']?.toString().trim() ?? 'Ahli Waris';
   }
 
   Future<void> _showSchemeEditor(BuildContext context, WidgetRef ref) async {
@@ -464,17 +466,18 @@ class _MemberDropdown extends StatelessWidget {
       String name;
       if (accountName != null && accountName.isNotEmpty) {
         name = accountName;
+      } else if (m['ahliWarisName']?.toString().trim().isNotEmpty == true) {
+        name = m['ahliWarisName'].toString().trim();
       } else {
-        name = (m['ahliWarisName']?.toString().isNotEmpty ?? false)
-            ? m['ahliWarisName'].toString()
-            : 'Ahli Waris';
+        name = m['relationshipDescription']?.toString().trim() ?? 'Ahli Waris';
       }
       
       final desc = m['relationshipDescription']?.toString() ?? '-';
+      final label = (name == desc) ? name : '$name ($desc)';
       
       return WtDropdownItem(
         value: id,
-        label: '$name ($desc)',
+        label: label,
         avatarUrl: ahliWarisObj?['avatarUrl']?.toString() ?? '',
       );
     }).toList();
