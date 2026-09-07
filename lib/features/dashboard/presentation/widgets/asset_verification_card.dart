@@ -18,24 +18,8 @@ class AssetVerificationCard extends ConsumerWidget {
       return DoneCard(assetName: asset.assetName, isDark: isDark);
     }
 
-    return Container(
+    return WtSurfaceCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: (isDark ? Colors.white : AppColors.navy).withValues(
-            alpha: 0.05,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
