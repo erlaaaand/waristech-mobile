@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/network/storage_upload_service.dart';
+import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/confirm_upload_sheet.dart';
@@ -68,16 +69,18 @@ class _LaporNotifier extends StateNotifier<_LaporState> {
     }
   }
 
-  /// Kirim laporan — [pewarisId] wajib karena backend belum menyediakan
-  /// endpoint bagi Ahli Waris untuk menemukan ID Pewaris terkait sebelum
-  /// ada aset yang dialokasikan.
+  /// Kirim laporan — [pewarisId] diturunkan otomatis dari
+  /// myFamilyMembershipProvider (Pewaris yang mengundang Ahli Waris ini
+  /// sudah diketahui sejak registrasi, tidak perlu diketik ulang manual).
   Future<void> submit(String pewarisId) async {
     if (state.file == null) {
       state = state.copyWith(error: 'Pilih dokumen terlebih dahulu.');
       return;
     }
     if (pewarisId.trim().isEmpty) {
-      state = state.copyWith(error: 'ID Pewaris wajib diisi.');
+      state = state.copyWith(
+        error: 'Data Pewaris belum termuat. Coba lagi sebentar.',
+      );
       return;
     }
     final file = state.file;
@@ -139,21 +142,25 @@ class AhliWarisLaporView extends ConsumerStatefulWidget {
 }
 
 class _AhliWarisLaporViewState extends ConsumerState<AhliWarisLaporView> {
-  final _pewarisIdCtrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _pewarisIdCtrl.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(_laporStateProvider);
+    final membershipAsync = ref.watch(myFamilyMembershipProvider);
 
     if (state.isDone) {
       return const SubmitSuccessView();
     }
+
+    final entries = membershipAsync.valueOrNull
+            ?.whereType<Map<String, dynamic>>()
+            .toList() ??
+        const <Map<String, dynamic>>[];
+    final pewarisId = entries.isNotEmpty
+        ? entries.first['pewarisId']?.toString()
+        : null;
+    final pewarisName = entries.isNotEmpty
+        ? entries.first['pewarisName']?.toString()
+        : null;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
@@ -164,12 +171,49 @@ class _AhliWarisLaporViewState extends ConsumerState<AhliWarisLaporView> {
           const SizedBox(height: 24),
           const LaporInfoCard(),
           const SizedBox(height: 16),
-          WtFormField(
-            label: 'ID Pewaris (UUID)',
-            controller: _pewarisIdCtrl,
-            hintText:
-                'Diperoleh dari anggota keluarga atau catatan pendaftaran',
-          ),
+          if (membershipAsync.isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (pewarisId == null)
+            const WtErrorBanner(
+              message:
+                  'Data Pewaris belum ditemukan. Pastikan Anda sudah terdaftar '
+                  'sebagai Ahli Waris sebelum mengunggah akta.',
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.person_outline,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      pewarisName != null && pewarisName.isNotEmpty
+                          ? 'Dilaporkan untuk Pewaris: $pewarisName'
+                          : 'Pewaris sudah teridentifikasi otomatis dari akun Anda.',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 16),
           UploadArea(
             file: state.file,
@@ -193,8 +237,8 @@ class _AhliWarisLaporViewState extends ConsumerState<AhliWarisLaporView> {
             label: 'Kirim Dokumen',
             icon: Icons.send,
             isLoading: state.isUploading,
-            onPressed: state.file != null
-                ? () => _confirmAndSubmit(context, ref)
+            onPressed: state.file != null && pewarisId != null
+                ? () => _confirmAndSubmit(context, ref, pewarisId)
                 : null,
           ),
         ],
@@ -204,13 +248,17 @@ class _AhliWarisLaporViewState extends ConsumerState<AhliWarisLaporView> {
 
   /// Konfirmasi eksplisit sebelum kirim — pengiriman akta memicu proses
   /// verifikasi hukum oleh Notaris dan tidak bisa dibatalkan begitu terkirim.
-  Future<void> _confirmAndSubmit(BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmAndSubmit(
+    BuildContext context,
+    WidgetRef ref,
+    String pewarisId,
+  ) async {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) => const ConfirmUploadSheet(),
     );
     if (confirmed != true || !context.mounted) return;
-    ref.read(_laporStateProvider.notifier).submit(_pewarisIdCtrl.text);
+    ref.read(_laporStateProvider.notifier).submit(pewarisId);
   }
 }
