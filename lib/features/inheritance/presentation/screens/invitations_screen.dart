@@ -4,6 +4,7 @@ import 'package:wt_mobile/core/network/storage_upload_service.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/utils/clipboard_utils.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
+import 'package:wt_mobile/features/dashboard/presentation/widgets/ahli_waris_detail_sheet.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
 
 /// Buat & kelola link undangan Ahli Waris — GET/POST /inheritance/invitations.
@@ -272,64 +273,113 @@ class _InvitationsScreenState extends ConsumerState<InvitationsScreen> {
   }
 }
 
-class _InvitationCard extends StatelessWidget {
+class _InvitationCard extends ConsumerWidget {
   final Map<String, dynamic> invitation;
   const _InvitationCard({required this.invitation});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final code = invitation['code']?.toString() ?? '-';
     final link = invitation['invitationLink']?.toString() ?? '';
     final status = invitation['status']?.toString() ?? 'PENDING';
     final isUsed = status == 'USED';
+    final usedByAhliWarisId = invitation['usedByAhliWarisId']?.toString();
+
+    // Undangan yang sudah dipakai TIDAK menyimpan nama pemakainya sendiri —
+    // cocokkan lewat familyMembersProvider (dibuat otomatis saat registrasi)
+    // supaya Pewaris tahu SIAPA persisnya, bukan cuma status "Dipakai".
+    Map<String, dynamic>? matchedMember;
+    if (isUsed && usedByAhliWarisId != null) {
+      final familyAsync = ref.watch(familyMembersProvider);
+      final members =
+          familyAsync.valueOrNull?.whereType<Map<String, dynamic>>() ??
+          const <Map<String, dynamic>>[];
+      for (final m in members) {
+        if (m['ahliWarisId']?.toString() == usedByAhliWarisId) {
+          matchedMember = m;
+          break;
+        }
+      }
+    }
+    final matchedName =
+        matchedMember != null &&
+            (matchedMember['ahliWarisName']?.toString().isNotEmpty ?? false)
+        ? matchedMember['ahliWarisName'].toString()
+        : null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: WtSurfaceCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    code,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+      child: InkWell(
+        onTap: matchedMember != null
+            ? () => showAhliWarisDetail(context, matchedMember!)
+            : null,
+        borderRadius: BorderRadius.circular(20),
+        child: WtSurfaceCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (matchedName != null) ...[
+                          Text(
+                            matchedName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ],
+                        Text(
+                          code,
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontWeight: matchedName != null
+                                ? FontWeight.normal
+                                : FontWeight.bold,
+                            fontSize: matchedName != null ? 12 : 14,
+                            color: matchedName != null
+                                ? AppColors.gray500
+                                : null,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                WtStatusBadge(
-                  label: isUsed ? 'Dipakai' : 'Menunggu',
-                  color: isUsed ? AppColors.success : AppColors.amber,
-                  dot: true,
+                  WtStatusBadge(
+                    label: isUsed ? 'Dipakai' : 'Menunggu',
+                    color: isUsed ? AppColors.success : AppColors.amber,
+                    dot: true,
+                  ),
+                ],
+              ),
+              if (!isUsed && link.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        copyToClipboard(context, link, 'Link undangan'),
+                    icon: const Icon(Icons.link, size: 16),
+                    label: const Text(
+                      'Salin Link Undangan',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
                 ),
               ],
-            ),
-            if (!isUsed && link.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () =>
-                      copyToClipboard(context, link, 'Link undangan'),
-                  icon: const Icon(Icons.link, size: 16),
-                  label: const Text(
-                    'Salin Link Undangan',
-                    style: TextStyle(fontSize: 13),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
+import 'package:wt_mobile/features/dashboard/presentation/widgets/ahli_waris_detail_sheet.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
 import 'package:wt_mobile/features/proof_of_life/domain/entities/proof_of_life_status_entity.dart';
 
@@ -82,16 +83,22 @@ class SavedAssetsHeroCard extends StatelessWidget {
                         width: 42,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryLightest.withValues(alpha: 0.2),
+                          color: AppColors.primaryLightest.withValues(
+                            alpha: 0.2,
+                          ),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: AppColors.primaryLightest.withValues(alpha: 0.3),
+                            color: AppColors.primaryLightest.withValues(
+                              alpha: 0.3,
+                            ),
                             width: 1,
                           ),
                         ),
                         child: Icon(
                           Icons.sim_card,
-                          color: AppColors.primaryLightest.withValues(alpha: 0.8),
+                          color: AppColors.primaryLightest.withValues(
+                            alpha: 0.8,
+                          ),
                           size: 20,
                         ),
                       ),
@@ -116,7 +123,7 @@ class SavedAssetsHeroCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   // Middle section: Data
                   assetsAsync.when(
                     loading: () => const Center(
@@ -186,7 +193,7 @@ class SavedAssetsHeroCard extends StatelessWidget {
                       );
                     },
                   ),
-                  
+
                   // Bottom section: Footer info
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -309,7 +316,8 @@ class ProofOfLifeCard extends StatelessWidget {
 
     final status = statusState.valueOrNull;
     final now = DateTime.now();
-    final hasCheckedInToday = status != null &&
+    final hasCheckedInToday =
+        status != null &&
         status.lastCheckInAt.toLocal().year == now.year &&
         status.lastCheckInAt.toLocal().month == now.month &&
         status.lastCheckInAt.toLocal().day == now.day;
@@ -321,7 +329,9 @@ class ProofOfLifeCard extends StatelessWidget {
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? AppColors.primaryDeep : AppColors.primaryLightest.withValues(alpha: 0.5),
+          color: isDark
+              ? AppColors.primaryDeep
+              : AppColors.primaryLightest.withValues(alpha: 0.5),
         ),
         boxShadow: [
           BoxShadow(
@@ -339,7 +349,9 @@ class ProofOfLifeCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLightest.withValues(alpha: isDark ? 0.1 : 0.3),
+                  color: AppColors.primaryLightest.withValues(
+                    alpha: isDark ? 0.1 : 0.3,
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -386,7 +398,11 @@ class ProofOfLifeCard extends StatelessWidget {
                                   : 'Sistem darurat akan segera diaktifkan!',
                               style: TextStyle(
                                 color: daysLeft > 0
-                                    ? (isWarning ? AppColors.danger : (isDark ? Colors.white70 : AppColors.gray600))
+                                    ? (isWarning
+                                          ? AppColors.danger
+                                          : (isDark
+                                                ? Colors.white70
+                                                : AppColors.gray600))
                                     : AppColors.danger,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
@@ -395,8 +411,17 @@ class ProofOfLifeCard extends StatelessWidget {
                           ],
                         );
                       },
-                      loading: () => Text('Memuat...', style: TextStyle(color: isDark ? Colors.white70 : AppColors.gray500, fontSize: 12)),
-                      error: (err, stack) => const Text('Gagal memuat status', style: TextStyle(color: AppColors.danger, fontSize: 12)),
+                      loading: () => Text(
+                        'Memuat...',
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : AppColors.gray500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      error: (err, stack) => const Text(
+                        'Gagal memuat status',
+                        style: TextStyle(color: AppColors.danger, fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
@@ -420,8 +445,12 @@ class ProofOfLifeCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: isDark ? AppColors.gray800 : AppColors.gray200,
-                disabledForegroundColor: isDark ? Colors.white54 : AppColors.gray500,
+                disabledBackgroundColor: isDark
+                    ? AppColors.gray800
+                    : AppColors.gray200,
+                disabledForegroundColor: isDark
+                    ? Colors.white54
+                    : AppColors.gray500,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -438,7 +467,9 @@ class ProofOfLifeCard extends StatelessWidget {
                       ),
                     )
                   : Text(
-                      hasCheckedInToday ? 'Sudah Check-in Hari Ini' : 'Check-in Sekarang',
+                      hasCheckedInToday
+                          ? 'Sudah Check-in Hari Ini'
+                          : 'Check-in Sekarang',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -487,7 +518,9 @@ class _ActionItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white.withValues(alpha: 0.7) : AppColors.gray700,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : AppColors.gray700,
             ),
           ),
         ],
@@ -597,46 +630,54 @@ class AhliWarisSection extends ConsumerWidget {
                 children: members.map((member) {
                   final name =
                       (member['ahliWarisName'] as String?)?.trim().isNotEmpty ==
-                              true
-                          ? member['ahliWarisName'] as String
-                          : (member['relationshipDescription'] as String?)
-                                  ?.trim() ??
-                              'Ahli Waris';
+                          true
+                      ? member['ahliWarisName'] as String
+                      : (member['relationshipDescription'] as String?)
+                                ?.trim() ??
+                            'Ahli Waris';
                   return Padding(
                     padding: const EdgeInsets.only(right: 20),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.darkSurface
-                                : AppColors.gray200,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            name[0].toUpperCase(),
-                            style: TextStyle(
-                              color: isDark ? Colors.white : AppColors.gray900,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                    child: GestureDetector(
+                      onTap: () => showAhliWarisDetail(
+                        context,
+                        member as Map<String, dynamic>,
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.gray200,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              name[0].toUpperCase(),
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white
+                                    : AppColors.gray900,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          name.split(' ').first,
-                          style: TextStyle(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.7)
-                                : AppColors.gray700,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(height: 8),
+                          Text(
+                            name.split(' ').first,
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.7)
+                                  : AppColors.gray700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
