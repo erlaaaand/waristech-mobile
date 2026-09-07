@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/network/storage_upload_service.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
+import 'package:wt_mobile/core/utils/phone_number_utils.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:wt_mobile/features/users/presentation/providers/user_provider.dart';
@@ -86,7 +87,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           userId: userId,
           fullName: _nameCtrl.text.trim(),
           email: _emailCtrl.text.trim(),
-          phone: _phoneCtrl.text.trim(),
+          phone: PhoneNumberUtils.normalize(_phoneCtrl.text.trim()) ??
+              _phoneCtrl.text.trim(),
           currentPassword: _changePassword
               ? _currentPasswordCtrl.text
               : null,
@@ -217,9 +219,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   label: 'No. HP',
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'No. HP tidak boleh kosong'
-                      : null,
+                  hintText: '081234567890',
+                  validator: PhoneNumberUtils.validator,
                 ),
                 const SizedBox(height: 20),
                 InkWell(

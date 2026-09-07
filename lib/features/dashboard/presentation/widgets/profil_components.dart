@@ -7,7 +7,13 @@ import 'package:wt_mobile/features/notifications/presentation/providers/notifica
 class ProfileHeader extends StatelessWidget {
   final String name;
   final String email;
-  const ProfileHeader({super.key, required this.name, required this.email});
+  final String? phone;
+  const ProfileHeader({
+    super.key,
+    required this.name,
+    required this.email,
+    this.phone,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +66,15 @@ class ProfileHeader extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 13, color: AppColors.gray500),
           ),
+          if (phone != null && phone!.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              phone!,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13, color: AppColors.gray500),
+            ),
+          ],
         ],
       ),
     );

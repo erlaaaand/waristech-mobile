@@ -24,7 +24,11 @@ class PewarisProfilView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ProfileHeader(name: user?.name ?? '-', email: user?.email ?? '-'),
+          ProfileHeader(
+            name: user?.name ?? '-',
+            email: user?.email ?? '-',
+            phone: user?.phone,
+          ),
           const SizedBox(height: 20),
 
           // ── PERENCANAAN ────────────────────────────────────────────────

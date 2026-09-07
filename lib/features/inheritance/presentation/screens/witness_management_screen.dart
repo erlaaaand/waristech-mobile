@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
+import 'package:wt_mobile/core/utils/phone_number_utils.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/inheritance/presentation/providers/inheritance_provider.dart';
 
@@ -39,7 +40,8 @@ class _WitnessManagementScreenState
         .register(
           name: _nameCtrl.text.trim(),
           email: _emailCtrl.text.trim(),
-          phone: _phoneCtrl.text.trim(),
+          phone: PhoneNumberUtils.normalize(_phoneCtrl.text.trim()) ??
+              _phoneCtrl.text.trim(),
         );
     if (!mounted) return;
     final state = ref.read(registerWitnessProvider);
@@ -102,7 +104,8 @@ class _WitnessManagementScreenState
                       label: 'Nomor Telepon',
                       controller: _phoneCtrl,
                       keyboardType: TextInputType.phone,
-                      validator: _requiredValidator,
+                      hintText: '081234567890',
+                      validator: PhoneNumberUtils.validator,
                     ),
                     const SizedBox(height: 16),
                     SizedBox(

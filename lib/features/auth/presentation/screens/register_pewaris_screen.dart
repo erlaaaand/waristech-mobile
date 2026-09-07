@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
+import 'package:wt_mobile/core/utils/phone_number_utils.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
 
@@ -52,7 +53,9 @@ class _RegisterPewarisScreenState extends ConsumerState<RegisterPewarisScreen> {
           email: email,
           password: _passwordCtrl.text,
           fullName: _fullNameCtrl.text.trim(),
-          phoneNumber: _phoneCtrl.text.trim(),
+          phoneNumber:
+              PhoneNumberUtils.normalize(_phoneCtrl.text.trim()) ??
+                  _phoneCtrl.text.trim(),
           nik: _nikCtrl.text.trim(),
           consentAgreed: _consentAgreed,
         );
@@ -128,7 +131,8 @@ class _RegisterPewarisScreenState extends ConsumerState<RegisterPewarisScreen> {
               controller: _phoneCtrl,
               prefixIcon: const Icon(Icons.phone_outlined),
               keyboardType: TextInputType.phone,
-              validator: _requiredValidator('Nomor telepon'),
+              hintText: '081234567890',
+              validator: PhoneNumberUtils.validator,
             ),
             const SizedBox(height: 16),
             WtAuthField(
