@@ -441,7 +441,6 @@ class WtDropdownField<T> extends StatelessWidget {
           initialValue: value,
           validator: validator,
           builder: (FormFieldState<T> state) {
-            final hasError = state.hasError;
             return InkWell(
               onTap: () => _showBottomSheet(context, isDark),
               borderRadius: BorderRadius.circular(16),
