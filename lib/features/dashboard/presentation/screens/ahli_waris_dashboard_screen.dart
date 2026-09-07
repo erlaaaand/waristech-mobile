@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
-import 'package:wt_mobile/core/theme/theme_provider.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
-import 'package:wt_mobile/features/auth/presentation/providers/auth_provider.dart';
-import 'package:wt_mobile/features/compliance/presentation/screens/consent_status_screen.dart';
-import 'package:wt_mobile/features/users/presentation/screens/edit_profile_screen.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/ahli_waris/brankas_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/ahli_waris/home_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/ahli_waris/lacak_view.dart';
 import 'package:wt_mobile/features/dashboard/presentation/views/ahli_waris/lapor_view.dart';
+import 'package:wt_mobile/features/dashboard/presentation/views/ahli_waris/profil_view.dart';
 
 /// Shell screen untuk role Ahli Waris.
 class AhliWarisDashboardScreen extends ConsumerStatefulWidget {
@@ -45,6 +42,11 @@ class _AhliWarisDashboardScreenState
       icon: Icons.lock_outline,
       iconFilled: Icons.lock,
     ),
+    WtBottomNavItem(
+      id: 'profil',
+      icon: Icons.person_outline,
+      iconFilled: Icons.person,
+    ),
   ];
 
   void _navigate(int index) => setState(() => _currentIndex = index);
@@ -54,66 +56,24 @@ class _AhliWarisDashboardScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
+      // Sama seperti PewarisDashboardScreen: tidak ada AppBar terpisah —
+      // pengaturan (Edit Profil/Tema/Consent/Keluar) pindah ke tab Profil.
+      // SafeArea(top) WAJIB di sini karena tidak ada AppBar yang biasanya
+      // menyisihkan area status bar.
       extendBody: true,
-      appBar: AppBar(
-        title: const WtLogoWithText(title: 'Portal Ahli Waris'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Edit Profil',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const EditProfileScreen()),
-            ),
-          ),
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-            ),
-            tooltip: 'Ganti Tema',
-            onPressed: () => ref.read(themeProvider.notifier).toggle(context),
-          ),
-          // Aksi yang lebih jarang dipakai dipindah ke sini — sebelumnya 4
-          // IconButton berjejer bareng judul di satu baris, berdesakan di
-          // layar sempit (~360dp).
-          PopupMenuButton<void>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: 'Menu Lainnya',
-            itemBuilder: (context) => [
-              PopupMenuItem<void>(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ConsentStatusScreen(),
-                  ),
-                ),
-                child: const ListTile(
-                  leading: Icon(Icons.privacy_tip_outlined),
-                  title: Text('Persetujuan Data Pribadi'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem<void>(
-                onTap: () => ref.read(authProvider.notifier).logout(),
-                child: const ListTile(
-                  leading: Icon(Icons.logout, color: AppColors.danger),
-                  title: Text(
-                    'Keluar',
-                    style: TextStyle(color: AppColors.danger),
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: FadeIndexedStack(
-        index: _currentIndex,
-        children: [
-          AhliWarisHomeView(onNavigate: _navigate),
-          const AhliWarisLaporView(),
-          const AhliWarisLacakView(),
-          const AhliWarisBrankasView(),
-        ],
+      body: SafeArea(
+        bottom: false,
+        child: FadeIndexedStack(
+          index: _currentIndex,
+          children: [
+            AhliWarisHomeView(onNavigate: _navigate),
+            const AhliWarisLaporView(),
+            const AhliWarisLacakView(),
+            const AhliWarisBrankasView(),
+            const AhliWarisProfilView(),
+          ],
+        ),
       ),
       bottomNavigationBar: WtBottomNav(
         items: _navItems,

@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 
@@ -15,7 +16,7 @@ class WtBottomNavItem {
 }
 
 /// Bottom navigation mengambang bergaya modern (Glassmorphism).
-/// Pill melayang dengan efek frosted glass dan indikator aktif 
+/// Pill melayang dengan efek frosted glass dan indikator aktif
 /// yang bergeser mulus di belakang ikon, memberikan kesan premium
 /// dan sangat nyaman dilihat.
 class WtBottomNav extends StatelessWidget {
@@ -44,6 +45,11 @@ class WtBottomNav extends StatelessWidget {
         return 220;
       case 4:
         return 280;
+      // 5 item (tab Profil ditambahkan ke Ahli Waris) butuh nilai lebih
+      // rapat daripada formula default (336px) supaya tetap muat di layar
+      // sempit (~360dp) dengan margin 20px kiri-kanan.
+      case 5:
+        return 300;
       default:
         return (items.length * 64 + _hPadding * 2).clamp(220, 340).toDouble();
     }
@@ -53,7 +59,8 @@ class WtBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final slotWidth = (_pillWidth - _hPadding * 2) / items.length;
-    final indicatorLeft = _hPadding + slotWidth * currentIndex + (slotWidth - _indicatorSize) / 2;
+    final indicatorLeft =
+        _hPadding + slotWidth * currentIndex + (slotWidth - _indicatorSize) / 2;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 24, left: 20, right: 20),
@@ -73,13 +80,13 @@ class WtBottomNav extends StatelessWidget {
                     width: _pillWidth,
                     height: _pillHeight,
                     decoration: BoxDecoration(
-                      color: isDark 
-                          ? Colors.black.withValues(alpha: 0.6) 
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.6)
                           : Colors.white.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(_pillHeight / 2),
                       border: Border.all(
-                        color: isDark 
-                            ? Colors.white.withValues(alpha: 0.1) 
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
                             : Colors.black.withValues(alpha: 0.05),
                         width: 1,
                       ),
@@ -104,8 +111,8 @@ class WtBottomNav extends StatelessWidget {
                             width: _indicatorSize,
                             height: _indicatorSize,
                             decoration: BoxDecoration(
-                              color: isDark 
-                                  ? Colors.white.withValues(alpha: 0.15) 
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.15)
                                   : Colors.black.withValues(alpha: 0.08),
                               shape: BoxShape.circle,
                             ),
@@ -114,7 +121,9 @@ class WtBottomNav extends StatelessWidget {
 
                         // Icons
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: _hPadding),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: _hPadding,
+                          ),
                           child: Row(
                             children: List.generate(
                               items.length,
@@ -200,8 +209,8 @@ class _NavItemState extends State<_NavItem> {
                   isActive ? widget.item.iconFilled : widget.item.icon,
                   key: ValueKey(isActive),
                   size: isActive ? 26 : 24,
-                  color: isActive 
-                      ? (isDark ? Colors.white : AppColors.primary) 
+                  color: isActive
+                      ? (isDark ? Colors.white : AppColors.primary)
                       : (isDark ? Colors.white54 : AppColors.gray400),
                 ),
               ),

@@ -65,76 +65,9 @@ class PewarisHomeView extends ConsumerWidget {
                         horizontal: 24,
                         vertical: 16,
                       ),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: onOpenProfile,
-                            child: CircleAvatar(
-                              radius: 22,
-                              backgroundColor: isDark
-                                  ? AppColors.darkSurface
-                                  : AppColors.gray200,
-                              child: Text(
-                                (userName.trim().isNotEmpty)
-                                    ? userName.trim()[0].toUpperCase()
-                                    : 'P',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white
-                                      : AppColors.gray900,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Good morning,',
-                                  style: TextStyle(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.5)
-                                        : AppColors.gray500,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  userName,
-                                  style: TextStyle(
-                                    color: isDark
-                                        ? Colors.white
-                                        : AppColors.gray900,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : AppColors.gray100,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.notifications_outlined,
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.7)
-                                  : AppColors.gray700,
-                              size: 20,
-                            ),
-                          ),
-                        ],
+                      child: DashboardHomeHeader(
+                        userName: userName,
+                        onOpenProfile: onOpenProfile,
                       ),
                     ),
 

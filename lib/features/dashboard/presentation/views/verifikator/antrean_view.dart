@@ -10,7 +10,6 @@ import 'package:wt_mobile/features/verification/presentation/providers/verificat
 import 'package:wt_mobile/features/dashboard/presentation/widgets/asset_verification_card.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/death_certificate_verification_card.dart';
 import 'package:wt_mobile/features/dashboard/presentation/widgets/family_member_review_card.dart';
-import 'package:wt_mobile/features/dashboard/presentation/widgets/verifikator_header.dart';
 
 // ---------------------------------------------------------------------------
 // Provider: fetch pending assets dari backend
@@ -18,18 +17,15 @@ import 'package:wt_mobile/features/dashboard/presentation/widgets/verifikator_he
 
 /// Publik (bukan file-private) supaya `verifikator_dashboard_screen.dart`
 /// bisa ikut memantau jumlah antrean untuk badge nav — lihat A.3.
-final pendingAssetsNotarisProvider = FutureProvider.autoDispose<
-  List<AssetEntity>
->((
-  ref,
-) async {
-  final ds = VerificationRemoteDataSource();
-  final rawList = await ds.fetchPendingAssets();
-  return rawList
-      .where((a) => a['status'] == 'PENDING_VERIFICATION')
-      .map((a) => AssetEntity.fromJson(a as Map<String, dynamic>))
-      .toList();
-});
+final pendingAssetsNotarisProvider =
+    FutureProvider.autoDispose<List<AssetEntity>>((ref) async {
+      final ds = VerificationRemoteDataSource();
+      final rawList = await ds.fetchPendingAssets();
+      return rawList
+          .where((a) => a['status'] == 'PENDING_VERIFICATION')
+          .map((a) => AssetEntity.fromJson(a as Map<String, dynamic>))
+          .toList();
+    });
 
 // ---------------------------------------------------------------------------
 // View
@@ -37,11 +33,13 @@ final pendingAssetsNotarisProvider = FutureProvider.autoDispose<
 
 /// Tab Antrean Verifikasi untuk role Notaris.
 class VerifikatorAntreanView extends ConsumerWidget {
-  const VerifikatorAntreanView({super.key});
+  final VoidCallback onOpenProfile;
+  const VerifikatorAntreanView({super.key, required this.onOpenProfile});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userName = ref.watch(authProvider).value?.name ?? 'Notaris';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final pendingAsync = ref.watch(pendingAssetsNotarisProvider);
     final familyAsync = ref.watch(pendingFamilyMembersProvider);
 
@@ -50,7 +48,20 @@ class VerifikatorAntreanView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          VerifikatorHeader(userName: userName),
+          DashboardHomeHeader(
+            userName: userName,
+            onOpenProfile: onOpenProfile,
+            subtitle: Text(
+              'Notaris / Verifikator Legal',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.4)
+                    : AppColors.navy.withValues(alpha: 0.8),
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
           const Text(
             'Akta Kematian',

@@ -116,3 +116,103 @@ class WtScreenHeader extends StatelessWidget {
     );
   }
 }
+
+/// Header standar Beranda/tab-utama KETIGA role — dimodelkan dari header
+/// Pewaris (avatar bulat tap→Profil, sapaan, ikon notifikasi). Sejak AppBar
+/// dihapus dari shell Ahli Waris/Notaris (lihat `*_dashboard_screen.dart`),
+/// widget ini jadi satu-satunya sumber akses avatar→Profil di ketiga role.
+/// [subtitle] opsional untuk info spesifik-role (mis. badge "Eksekutor"
+/// Ahli Waris, caption "Notaris / Verifikator Legal") yang sebelumnya ada
+/// di `AhliWarisHeader`/`VerifikatorHeader` (kini dihapus).
+///
+/// TIDAK membawa padding horizontal sendiri — pemanggil punya skema padding
+/// tab masing-masing (Pewaris: 24px lewat wrapper eksplisit; Ahli Waris/
+/// Notaris: 20px sudah dari `SingleChildScrollView` induknya) yang berbeda
+/// tipis, disengaja supaya tidak dobel-padding dengan konten lain di tab
+/// yang sama.
+class DashboardHomeHeader extends StatelessWidget {
+  final String userName;
+  final VoidCallback onOpenProfile;
+  final Widget? subtitle;
+
+  const DashboardHomeHeader({
+    super.key,
+    required this.userName,
+    required this.onOpenProfile,
+    this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: onOpenProfile,
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: isDark
+                ? AppColors.darkSurface
+                : AppColors.primaryLightest,
+            child: Text(
+              userName.trim().isNotEmpty
+                  ? userName.trim()[0].toUpperCase()
+                  : '?',
+              style: TextStyle(
+                color: isDark ? Colors.white : AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Selamat datang,',
+                style: TextStyle(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.5)
+                      : AppColors.primary.withValues(alpha: 0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                userName,
+                style: TextStyle(
+                  color: isDark ? Colors.white : AppColors.navy,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (subtitle != null) ...[const SizedBox(height: 3), subtitle!],
+            ],
+          ),
+        ),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : AppColors.gray100,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.notifications_outlined,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.7)
+                : AppColors.gray700,
+            size: 20,
+          ),
+        ),
+      ],
+    );
+  }
+}
