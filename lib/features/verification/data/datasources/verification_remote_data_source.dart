@@ -73,18 +73,15 @@ class VerificationRemoteDataSource extends BaseRemoteDataSource {
     });
   }
 
-  /// Ambil riwayat aset yang sudah diverifikasi/ditolak.
+  /// Ambil riwayat aset yang pernah diputuskan Notaris ini. Backend sudah
+  /// menentukan status mana yang termasuk riwayat (VERIFIED s.d. CLOSED,
+  /// termasuk UNLOCKED/LIQUIDATING/FROZEN) — dulu klien menyaring ulang
+  /// sehingga aset yang sudah berlanjut ke tahap pewarisan justru hilang.
   Future<List<dynamic>> fetchHistory() {
     return safeCall(() async {
       final response = await dio.get<dynamic>('/assets/notaris/history');
       final unwrapped = unwrapData(response.data);
-      if (unwrapped is! List) return [];
-      // Filter yang sudah diproses
-      return (unwrapped)
-          .where(
-            (a) => ['VERIFIED', 'REJECTED', 'CLOSED'].contains(a['status']),
-          )
-          .toList();
+      return unwrapped is List ? unwrapped : [];
     });
   }
 }

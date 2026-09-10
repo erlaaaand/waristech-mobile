@@ -13,6 +13,7 @@ class ProofReviewCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final reviewState = ref.watch(reviewLiquidationProofProvider(proof.id));
+    final submittedAt = proof.createdAt.toLocal();
 
     return WtSurfaceCard(
       padding: const EdgeInsets.all(18),
@@ -22,6 +23,11 @@ class ProofReviewCard extends ConsumerWidget {
           Text(
             proof.assetName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Diajukan Eksekutor ${submittedAt.day}/${submittedAt.month}/${submittedAt.year} · SPTJM disetujui',
+            style: const TextStyle(fontSize: 12, color: AppColors.gray500),
           ),
           const SizedBox(height: 10),
           InkWell(

@@ -105,15 +105,7 @@ class _LaporNotifier extends StateNotifier<_LaporState> {
       await _ref
           .read(submitDeathCertificateProvider.notifier)
           .submit(pewarisId: pewarisId.trim(), documentUrl: url);
-      final submitState = _ref.read(submitDeathCertificateProvider);
-      if (submitState.hasError) {
-        state = state.copyWith(
-          isUploading: false,
-          uploadedUrl: url,
-          error: submitState.error.toString(),
-        );
-        return;
-      }
+      _ref.invalidate(myInheritanceProgressProvider);
       state = state.copyWith(
         isUploading: false,
         uploadedUrl: url,
@@ -161,6 +153,28 @@ class _AhliWarisLaporViewState extends ConsumerState<AhliWarisLaporView> {
     final pewarisName = entries.isNotEmpty
         ? entries.first['pewarisName']?.toString()
         : null;
+
+    // Bila akta untuk Pewaris ini SUDAH diajukan/diverifikasi, form unggah
+    // tidak relevan lagi — tampilkan statusnya supaya tidak ada pengajuan ganda.
+    final progress = ref
+        .watch(myInheritanceProgressProvider)
+        .valueOrNull
+        ?.whereType<Map<String, dynamic>>()
+        .where((p) => p['pewarisId']?.toString() == pewarisId)
+        .firstOrNull;
+    final certStatus = progress?['deathCertificateStatus']?.toString();
+    if (certStatus == 'VERIFIED' || certStatus == 'PENDING_VERIFICATION') {
+      final isVerified = certStatus == 'VERIFIED';
+      final dateKey = isVerified
+          ? 'deathCertificateVerifiedAt'
+          : 'deathCertificateSubmittedAt';
+      final rawDate = progress?[dateKey]?.toString() ?? '';
+      return _AlreadySubmittedView(
+        pewarisName: pewarisName,
+        isVerified: isVerified,
+        date: DateTime.tryParse(rawDate)?.toLocal(),
+      );
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
@@ -260,5 +274,53 @@ class _AhliWarisLaporViewState extends ConsumerState<AhliWarisLaporView> {
     );
     if (confirmed != true || !context.mounted) return;
     ref.read(_laporStateProvider.notifier).submit(pewarisId);
+  }
+}
+
+/// Ringkasan status saat akta kematian Pewaris sudah pernah diajukan.
+class _AlreadySubmittedView extends StatelessWidget {
+  final String? pewarisName;
+  final bool isVerified;
+  final DateTime? date;
+
+  const _AlreadySubmittedView({
+    required this.pewarisName,
+    required this.isVerified,
+    required this.date,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (pewarisName != null && pewarisName!.isNotEmpty)
+        ? pewarisName!
+        : 'Pewaris';
+    final dateText = date == null
+        ? ''
+        : ' pada ${date!.day}/${date!.month}/${date!.year}';
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const WtScreenHeader(label: 'Pelaporan', title: 'Akta Kematian'),
+          const SizedBox(height: 24),
+          WtInfoCard(
+            icon: isVerified ? Icons.verified : Icons.hourglass_top,
+            iconColor: isVerified ? AppColors.success : AppColors.amber,
+            title: isVerified
+                ? 'Akta Sudah Diverifikasi'
+                : 'Akta Menunggu Verifikasi',
+            description: isVerified
+                ? 'Akta kematian $name telah diverifikasi Notaris$dateText. '
+                      'Proses berlanjut ke persetujuan saksi — pantau di tab Lacak.'
+                : 'Akta kematian $name sudah diajukan$dateText dan sedang '
+                      'ditinjau Notaris. Anda tidak perlu mengunggah ulang.',
+            padding: const EdgeInsets.all(24),
+            tinted: true,
+          ),
+        ],
+      ),
+    );
   }
 }

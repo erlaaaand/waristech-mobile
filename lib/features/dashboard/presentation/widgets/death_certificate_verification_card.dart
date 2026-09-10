@@ -21,7 +21,19 @@ class DeathCertificateReviewCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final id = item['id']?.toString() ?? '';
-    final pewarisId = item['pewarisId']?.toString() ?? '-';
+    // Dulu yang tampil hanya UUID Pewaris — Notaris tidak bisa menilai
+    // dokumen tanpa tahu SIAPA yang dilaporkan wafat dan siapa pelapornya.
+    final pewarisName = item['pewarisName']?.toString();
+    final submittedByName = item['submittedByName']?.toString();
+    final createdAt = DateTime.tryParse(
+      item['createdAt']?.toString() ?? '',
+    )?.toLocal();
+    final subtitleParts = [
+      if (submittedByName != null && submittedByName.isNotEmpty)
+        'Dilaporkan oleh $submittedByName',
+      if (createdAt != null)
+        '${createdAt.day}/${createdAt.month}/${createdAt.year}',
+    ];
     final documentUrl = item['documentUrl']?.toString();
     final actionState = ref.watch(verifyDeathCertificateProvider(id));
 
@@ -49,22 +61,28 @@ class DeathCertificateReviewCard extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const InitialAvatar(initial: 'P'),
+              InitialAvatar(
+                initial: (pewarisName != null && pewarisName.isNotEmpty)
+                    ? pewarisName[0].toUpperCase()
+                    : 'P',
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Akta Kematian',
-                      style: TextStyle(
+                    Text(
+                      pewarisName ?? 'Pewaris tidak dikenal',
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Pewaris: $pewarisId',
+                      subtitleParts.isEmpty
+                          ? 'Akta kematian'
+                          : subtitleParts.join(' · '),
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark

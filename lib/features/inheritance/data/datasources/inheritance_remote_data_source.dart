@@ -52,6 +52,16 @@ class InheritanceRemoteDataSource extends BaseRemoteDataSource {
     });
   }
 
+  /// GET /inheritance/progress/me — (Ahli Waris) progres verifikasi berjenjang
+  /// per Pewaris: status akta kematian & rekap persetujuan saksi.
+  Future<List<dynamic>> getMyInheritanceProgress() {
+    return safeCall(() async {
+      final response = await dio.get<dynamic>('/inheritance/progress/me');
+      final unwrapped = unwrapData(response.data);
+      return unwrapped is List ? unwrapped : [];
+    });
+  }
+
   /// PATCH /inheritance/family-members/:id/confirm — konfirmasi anggota keluarga.
   Future<void> confirmFamilyMember(String memberId) {
     return safeCall(() async {

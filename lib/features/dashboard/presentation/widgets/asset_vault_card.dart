@@ -251,16 +251,40 @@ class _AssetActionArea extends ConsumerWidget {
       );
     }
 
-    if (!isExecutor) {
-      return const Text(
-        'Eksekutor bertanggung jawab mencairkan aset ini dan mendistribusikan bagian Anda.',
-        style: TextStyle(fontSize: 12.5, color: AppColors.gray600, height: 1.4),
-      );
-    }
-
     return Text(
-      'Brankas belum bisa dibuka pada status "${asset.status.displayLabel}".',
+      _statusMessage(asset.status, isExecutor: isExecutor),
       style: const TextStyle(fontSize: 12.5, color: AppColors.gray600, height: 1.4),
     );
+  }
+
+  /// Keterangan yang relevan dengan TAHAP aset saat ini. Dulu Ahli Waris
+  /// non-eksekutor selalu melihat "Eksekutor bertanggung jawab mencairkan…"
+  /// bahkan saat Pewaris masih hidup atau kasusnya sudah ditutup.
+  String _statusMessage(AssetStatus status, {required bool isExecutor}) {
+    switch (status) {
+      case AssetStatus.pendingVerification:
+        return 'Aset masih menunggu verifikasi Notaris. Pewaris masih dapat mengubah alokasinya.';
+      case AssetStatus.verified:
+        return 'Aset sudah terverifikasi Notaris. Brankas baru dapat dibuka setelah verifikasi kematian Pewaris selesai.';
+      case AssetStatus.rejected:
+        return 'Aset ditolak Notaris saat verifikasi dan menunggu perbaikan dari Pewaris.';
+      case AssetStatus.pendingCooldown:
+        return 'Masa tunda 14 hari sedang berjalan. Brankas terbuka otomatis bila tidak ada sanggahan.';
+      case AssetStatus.frozen:
+        return 'Aset dibekukan karena ada sanggahan saksi — menunggu keputusan Notaris.';
+      case AssetStatus.disputedLiquidation:
+        return 'Pencairan aset disengketakan dan sedang ditinjau Notaris.';
+      case AssetStatus.unlocked:
+      case AssetStatus.liquidating:
+        return isExecutor
+            ? 'Bukti pencairan sudah dikirim dan menunggu tinjauan Notaris.'
+            : 'Eksekutor sedang mencairkan aset ini dan akan mendistribusikan bagian Anda.';
+      case AssetStatus.distributed:
+        return isExecutor
+            ? 'Dana telah didistribusikan. Menunggu konfirmasi penerimaan dari ahli waris lain.'
+            : 'Dana telah didistribusikan.';
+      case AssetStatus.closed:
+        return 'Kasus ditutup Notaris. Data rahasia aset telah dihancurkan.';
+    }
   }
 }

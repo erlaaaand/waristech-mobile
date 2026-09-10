@@ -205,8 +205,15 @@ class _WitnessList extends StatelessWidget {
         else
           ...items.whereType<Map<String, dynamic>>().map((w) {
             final isDark = Theme.of(context).brightness == Brightness.dark;
+            // Nilai persis enum WitnessStatus backend: PENDING/APPROVE/DISPUTE
+            // (dulu dibandingkan dengan 'APPROVED' sehingga saksi yang sudah
+            // setuju tetap tampil "Menunggu").
             final status = w['status']?.toString() ?? 'PENDING';
-            final isApproved = status == 'APPROVED';
+            final (statusLabel, statusColor) = switch (status) {
+              'APPROVE' => ('Disetujui', AppColors.success),
+              'DISPUTE' => ('Menyanggah', AppColors.danger),
+              _ => ('Menunggu', AppColors.amber),
+            };
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: WtSurfaceCard(
@@ -256,8 +263,8 @@ class _WitnessList extends StatelessWidget {
                       ),
                     ),
                     WtStatusBadge(
-                      label: isApproved ? 'Disetujui' : 'Menunggu',
-                      color: isApproved ? AppColors.success : AppColors.amber,
+                      label: statusLabel,
+                      color: statusColor,
                       dot: true,
                     ),
                   ],

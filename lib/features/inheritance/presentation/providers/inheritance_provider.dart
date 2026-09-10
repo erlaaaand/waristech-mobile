@@ -25,6 +25,13 @@ final myFamilyMembershipProvider = FutureProvider.autoDispose<List<dynamic>>((
   return _ds.getMyFamilyMembership();
 });
 
+/// (Ahli Waris) Progres verifikasi berjenjang per Pewaris — status akta
+/// kematian (NOT_SUBMITTED/PENDING_VERIFICATION/VERIFIED) & rekap saksi.
+final myInheritanceProgressProvider =
+    FutureProvider.autoDispose<List<dynamic>>((ref) {
+      return _ds.getMyInheritanceProgress();
+    });
+
 // ---------------------------------------------------------------------------
 // Notifier untuk generate invitation
 // ---------------------------------------------------------------------------
@@ -207,17 +214,23 @@ class SubmitDeathCertificateNotifier extends StateNotifier<AsyncValue<void>> {
     required String documentUrl,
   }) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
+    final res = await AsyncValue.guard(
       () => _ds.submitDeathCertificate(
         pewarisId: pewarisId,
         documentUrl: documentUrl,
       ),
     );
+    if (mounted) {
+      state = res;
+    }
+    if (res.hasError) {
+      throw res.error!;
+    }
   }
 }
 
 final submitDeathCertificateProvider =
-    StateNotifierProvider.autoDispose<
+    StateNotifierProvider<
       SubmitDeathCertificateNotifier,
       AsyncValue<void>
     >((ref) => SubmitDeathCertificateNotifier());
@@ -231,14 +244,21 @@ class WitnessDecisionNotifier extends StateNotifier<AsyncValue<void>> {
     required String decision,
   }) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
+    final res = await AsyncValue.guard(
       () => _ds.submitWitnessDecision(witnessId: witnessId, decision: decision),
     );
+    if (mounted) {
+      state = res;
+    }
+    if (res.hasError) {
+      throw res.error!;
+    }
   }
 }
 
 final witnessDecisionProvider =
-    StateNotifierProvider.autoDispose<
+    StateNotifierProvider<
       WitnessDecisionNotifier,
       AsyncValue<void>
     >((ref) => WitnessDecisionNotifier());
+

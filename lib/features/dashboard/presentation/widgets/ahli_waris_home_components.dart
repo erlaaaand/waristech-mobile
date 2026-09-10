@@ -28,12 +28,6 @@ class AccessStatusBanner extends StatelessWidget {
         padding: EdgeInsets.all(24),
       ),
       data: (assets) {
-        final anyOpenable = assets.any(
-          (a) =>
-              a.status == AssetStatus.unlocked ||
-              a.status == AssetStatus.liquidating ||
-              a.status == AssetStatus.distributed,
-        );
         if (assets.isEmpty) {
           return const WtInfoCard(
             icon: Icons.lock_clock,
@@ -43,7 +37,18 @@ class AccessStatusBanner extends StatelessWidget {
             padding: EdgeInsets.all(24),
           );
         }
-        if (anyOpenable) {
+        bool any(Set<AssetStatus> statuses) =>
+            assets.any((a) => statuses.contains(a.status));
+
+        // Urutan penting: tampilkan kondisi paling "maju"/mendesak dulu.
+        // Dulu semua selain unlocked/liquidating/distributed jatuh ke
+        // "Akses Terkunci — verifikasi diperlukan", termasuk aset yang
+        // sudah dalam masa tunda, dibekukan, atau bahkan sudah ditutup.
+        if (any({
+          AssetStatus.unlocked,
+          AssetStatus.liquidating,
+          AssetStatus.distributed,
+        })) {
           return const WtInfoCard(
             icon: Icons.lock_open,
             iconColor: AppColors.success,
@@ -53,11 +58,41 @@ class AccessStatusBanner extends StatelessWidget {
             tinted: true,
           );
         }
+        if (any({AssetStatus.pendingCooldown})) {
+          return const WtInfoCard(
+            icon: Icons.hourglass_top,
+            iconColor: AppColors.amber,
+            title: 'Masa Tunda 14 Hari',
+            description: 'Akta kematian & persetujuan saksi sudah lengkap. Brankas terbuka otomatis setelah masa tunda berakhir, selama tidak ada sanggahan.',
+            padding: EdgeInsets.all(24),
+            tinted: true,
+          );
+        }
+        if (any({AssetStatus.frozen, AssetStatus.disputedLiquidation})) {
+          return const WtInfoCard(
+            icon: Icons.gavel_outlined,
+            iconColor: AppColors.danger,
+            title: 'Aset Dalam Sengketa',
+            description: 'Ada sanggahan atau sengketa pada aset warisan. Notaris akan meninjau sebelum proses dilanjutkan.',
+            padding: EdgeInsets.all(24),
+            tinted: true,
+          );
+        }
+        if (assets.every((a) => a.status == AssetStatus.closed)) {
+          return const WtInfoCard(
+            icon: Icons.task_alt,
+            iconColor: AppColors.success,
+            title: 'Proses Waris Selesai',
+            description: 'Seluruh aset telah dibagikan dan kasusnya ditutup oleh Notaris.',
+            padding: EdgeInsets.all(24),
+            tinted: true,
+          );
+        }
         return const WtInfoCard(
           icon: Icons.lock_clock,
           iconColor: AppColors.amber,
           title: 'Akses Terkunci',
-          description: 'Brankas warisan Anda saat ini dalam masa tunggu. Verifikasi hukum (Akta Kematian & persetujuan Saksi) diperlukan sebelum kunci enkripsi dilepas.',
+          description: 'Brankas warisan hanya dapat dibuka setelah Akta Kematian diverifikasi Notaris dan minimal 3 Saksi memberi persetujuan. Pantau progresnya di tab Lacak.',
           padding: EdgeInsets.all(24),
           tinted: true,
         );

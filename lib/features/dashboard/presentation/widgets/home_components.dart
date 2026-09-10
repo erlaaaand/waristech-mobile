@@ -141,7 +141,7 @@ class SavedAssetsHeroCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'NO ASSETS SECURED',
+                              'BELUM ADA ASET',
                               style: TextStyle(
                                 color: Colors.white54,
                                 fontSize: 12,
@@ -150,7 +150,7 @@ class SavedAssetsHeroCard extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Ketuk untuk tambah',
+                              'Ketuk untuk menambah',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -162,12 +162,18 @@ class SavedAssetsHeroCard extends StatelessWidget {
                         );
                       }
 
+                      // Backend mengurutkan terbaru dulu. Identitas akun
+                      // SENGAJA disamarkan — tab Brankas pun menyamarkannya
+                      // sampai Pewaris menekan "Buka Kunci", jadi kartu
+                      // beranda tidak boleh membocorkannya begitu saja.
                       final recentAsset = assets.first;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            recentAsset.platform.toUpperCase(),
+                            'TERBARU · ${recentAsset.platform.toUpperCase()}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Colors.white54,
                               fontSize: 12,
@@ -177,17 +183,25 @@ class SavedAssetsHeroCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            recentAsset.accountIdentifier.isNotEmpty
-                                ? recentAsset.accountIdentifier
-                                : recentAsset.assetName,
+                            recentAsset.assetName,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 20,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: 1.5,
+                              letterSpacing: 0.5,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _maskIdentifier(recentAsset.accountIdentifier),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 2,
+                            ),
                           ),
                         ],
                       );
@@ -213,17 +227,29 @@ class SavedAssetsHeroCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           assetsAsync.maybeWhen(
-                            data: (assets) => Text(
-                              '${assets.length} ITEM SECURED',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1,
-                              ),
-                            ),
+                            data: (assets) {
+                              final verified = assets
+                                  .where(
+                                    (a) =>
+                                        a.status !=
+                                            AssetStatus.pendingVerification &&
+                                        a.status != AssetStatus.rejected,
+                                  )
+                                  .length;
+                              return Text(
+                                '${assets.length} ASET · $verified TERVERIFIKASI',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1,
+                                ),
+                              );
+                            },
+                            // Saat memuat/gagal jangan tampilkan "0" — itu
+                            // angka palsu, bukan jumlah aset sebenarnya.
                             orElse: () => const Text(
-                              '0 ITEM SECURED',
+                              '—',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -249,6 +275,12 @@ class SavedAssetsHeroCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Samarkan identitas akun — hanya 4 karakter terakhir yang terlihat.
+String _maskIdentifier(String identifier) {
+  if (identifier.length <= 4) return '••••';
+  return '•••• ${identifier.substring(identifier.length - 4)}';
 }
 
 class QuickActionsRow extends StatelessWidget {
@@ -379,25 +411,33 @@ class ProofOfLifeCard extends StatelessWidget {
                         final date = status.lastCheckInAt.toLocal();
                         final daysLeft = status.daysUntilDue;
                         final isWarning = daysLeft <= 7;
+                        // Di luar tahap aktif, protokol darurat SUDAH berjalan
+                        // — tampilkan tahap sebenarnya, bukan "akan segera".
+                        final isEscalated =
+                            status.stage != ProofOfLifeStage.active;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Terakhir: ${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                color: AppColors.success,
+                              style: TextStyle(
+                                color: isEscalated
+                                    ? AppColors.danger
+                                    : AppColors.success,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              daysLeft > 0
+                              isEscalated
+                                  ? 'Tahap: ${status.stage.displayLabel}'
+                                  : daysLeft > 0
                                   ? '$daysLeft hari tersisa untuk Check-in'
-                                  : 'Sistem darurat akan segera diaktifkan!',
+                                  : 'Batas check-in hari ini — segera konfirmasi.',
                               style: TextStyle(
-                                color: daysLeft > 0
+                                color: !isEscalated && daysLeft > 0
                                     ? (isWarning
                                           ? AppColors.danger
                                           : (isDark

@@ -201,6 +201,13 @@ class _UnlockedCredentials extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (secret.isEmpty) {
+      return const Text(
+        'Kunci berhasil direkonstruksi, namun Pewaris tidak menyimpan '
+        'kredensial apa pun pada aset ini.',
+        style: TextStyle(fontSize: 12.5, color: AppColors.gray600, height: 1.4),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -211,6 +218,8 @@ class _UnlockedCredentials extends StatelessWidget {
         if (secret.pin != null)
           _CredentialRow('PIN', secret.pin!, obscure: true),
         if (secret.notes != null) _CredentialRow('Catatan', secret.notes!),
+        for (final entry in secret.extras.entries)
+          _CredentialRow(entry.key, entry.value),
       ],
     );
   }

@@ -8,14 +8,45 @@ class VaultSecretEntity {
   final String? pin;
   final String? notes;
 
-  const VaultSecretEntity({this.username, this.password, this.pin, this.notes});
+  /// Field di luar 4 field standar `VaultSecretDto` (mis. data lama dengan
+  /// kunci berbeda). Tetap ditampilkan supaya kredensial yang berhasil
+  /// direkonstruksi tidak "hilang" hanya karena namanya tidak dikenal.
+  final Map<String, String> extras;
+
+  const VaultSecretEntity({
+    this.username,
+    this.password,
+    this.pin,
+    this.notes,
+    this.extras = const {},
+  });
+
+  static const _knownKeys = {'username', 'password', 'pin', 'notes'};
+
+  bool get isEmpty =>
+      username == null &&
+      password == null &&
+      pin == null &&
+      notes == null &&
+      extras.isEmpty;
 
   factory VaultSecretEntity.fromJson(Map<String, dynamic> json) {
+    String? read(String key) {
+      final value = json[key]?.toString();
+      return (value == null || value.isEmpty) ? null : value;
+    }
+
     return VaultSecretEntity(
-      username: json['username'] as String?,
-      password: json['password'] as String?,
-      pin: json['pin'] as String?,
-      notes: json['notes'] as String?,
+      username: read('username'),
+      password: read('password'),
+      pin: read('pin'),
+      notes: read('notes'),
+      extras: {
+        for (final entry in json.entries)
+          if (!_knownKeys.contains(entry.key) &&
+              (entry.value?.toString().isNotEmpty ?? false))
+            entry.key: entry.value.toString(),
+      },
     );
   }
 }

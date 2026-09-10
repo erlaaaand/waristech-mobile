@@ -2,23 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:wt_mobile/core/theme/app_colors.dart';
 import 'package:wt_mobile/core/widgets/wt_widgets.dart';
 import 'package:wt_mobile/features/assets/domain/entities/asset_entity.dart';
+import 'package:wt_mobile/features/assets/presentation/utils/asset_status_style.dart';
 
 class HistoryCard extends StatelessWidget {
   final AssetEntity asset;
   const HistoryCard({super.key, required this.asset});
-
-  (Color, String) _statusMeta(AssetStatus status) {
-    switch (status) {
-      case AssetStatus.verified:
-        return (AppColors.success, 'Disetujui');
-      case AssetStatus.rejected:
-        return (AppColors.danger, 'Ditolak');
-      case AssetStatus.closed:
-        return (AppColors.gray500, 'Ditutup');
-      default:
-        return (AppColors.amber, status.displayLabel);
-    }
-  }
 
   String _formatDate(DateTime? dt) {
     if (dt == null) return '-';
@@ -36,13 +24,28 @@ class HistoryCard extends StatelessWidget {
       'Nov',
       'Des',
     ];
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+    final local = dt.toLocal();
+    return '${local.day} ${months[local.month - 1]} ${local.year}';
+  }
+
+  /// Aset yang ditolak tidak punya `verifiedAt` — dulu tetap ditulis
+  /// "Diverifikasi pada: -". Tanggal yang relevan dipilih sesuai status.
+  String get _dateLine {
+    if (asset.status == AssetStatus.rejected) {
+      return 'Ditolak pada: ${_formatDate(asset.updatedAt)}';
+    }
+    if (asset.verifiedAt != null) {
+      return 'Diverifikasi pada: ${_formatDate(asset.verifiedAt)}';
+    }
+    return 'Diperbarui: ${_formatDate(asset.updatedAt)}';
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final (statusColor, statusLabel) = _statusMeta(asset.status);
+    final statusColor = asset.status == AssetStatus.closed
+        ? AppColors.gray500
+        : asset.status.color;
 
     return WtSurfaceCard(
       child: Column(
@@ -60,7 +63,10 @@ class HistoryCard extends StatelessWidget {
                   ),
                 ),
               ),
-              WtStatusBadge(label: statusLabel, color: statusColor),
+              WtStatusBadge(
+                label: asset.status.displayLabel,
+                color: statusColor,
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -76,7 +82,7 @@ class HistoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Diverifikasi pada: ${_formatDate(asset.verifiedAt)}',
+            _dateLine,
             style: TextStyle(
               fontSize: 11,
               color: isDark
